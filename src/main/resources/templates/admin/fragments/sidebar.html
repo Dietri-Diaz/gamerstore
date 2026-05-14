@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="admin-sidebar" th:fragment="sidebar">
+    <div class="admin-brand">
+        <i class="bi bi-controller"></i>
+        <div>
+            <div class="admin-brand-name">GamerStore</div>
+            <div class="admin-brand-sub">Panel admin</div>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <a th:href="@{/admin}" class="admin-sidebar-link" th:classappend="${moduloActivo == 'dashboard'} ? ' active'">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+        <a th:href="@{/admin/productos}" class="admin-sidebar-link" th:classappend="${moduloActivo == 'productos'} ? ' active'">
+            <i class="bi bi-box-seam"></i><span>Productos</span>
+        </a>
+        <a th:href="@{/admin/categorias}" class="admin-sidebar-link" th:classappend="${moduloActivo == 'categorias'} ? ' active'">
+            <i class="bi bi-tags"></i><span>Categorías</span>
+        </a>
+        <a th:href="@{/admin/clientes}" class="admin-sidebar-link" th:classappend="${moduloActivo == 'clientes'} ? ' active'">
+            <i class="bi bi-people"></i><span>Clientes</span>
+        </a>
+        <div style="padding: .9rem .9rem .3rem; margin-top: .5rem; color: var(--text-muted); font-size: .75rem; font-weight: 600;">Próximamente</div>
+        <span class="admin-sidebar-link" style="opacity: 0.45; cursor: not-allowed;">
+            <i class="bi bi-cash-coin"></i><span>POS (Avance 3)</span>
+        </span>
+        <span class="admin-sidebar-link" style="opacity: 0.45; cursor: not-allowed;">
+            <i class="bi bi-bag-check"></i><span>Pedidos (Avance 3)</span>
+        </span>
+    </nav>
+
+    <div class="admin-sidebar-foot">
+        <a th:href="@{/}" class="admin-sidebar-link">
+            <i class="bi bi-arrow-left-short"></i><span>Volver a la tienda</span>
+        </a>
+        <form th:action="@{/auth/logout}" method="post">
+            <button type="submit" class="admin-sidebar-link" style="width:100%; border:none; background:none; text-align:left;">
+                <i class="bi bi-box-arrow-right"></i><span>Cerrar sesión</span>
+            </button>
+        </form>
+    </div>
+</aside>
+</body>
+</html>

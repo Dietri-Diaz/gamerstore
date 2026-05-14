@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${producto.nombre} + ' — GamerStore'">Producto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<section class="py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/productos}">Catálogo</a></li>
+                <li class="breadcrumb-item">
+                    <a th:href="@{/productos(categoria=${producto.categoria.nombre})}"
+                       th:text="${producto.categoria.nombre}">Cat</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${producto.nombre}">Nombre</li>
+            </ol>
+        </nav>
+
+        <div class="row g-5">
+            <!-- IMAGEN -->
+            <div class="col-lg-6">
+                <div class="gs-card p-3">
+                    <img th:src="${producto.imagen}" th:alt="${producto.nombre}"
+                         style="width: 100%; height: 440px; object-fit: contain; border-radius: 8px;">
+                </div>
+            </div>
+
+            <!-- INFO -->
+            <div class="col-lg-6 d-flex flex-column">
+                <span class="badge-cat mb-3 d-inline-block align-self-start" th:text="${producto.categoria.nombre}">Categoría</span>
+                <h1 style="font-size: 2rem;" th:text="${producto.nombre}">Producto</h1>
+
+                <div class="d-flex align-items-center gap-3 mt-3 mb-3">
+                    <span style="font-size: 2rem; font-weight: 700; color: var(--text-strong);"
+                          th:text="'S/ ' + ${#numbers.formatDecimal(producto.precio, 1, 'COMMA', 2, 'POINT')}">
+                        S/ 0
+                    </span>
+                    <span th:if="${producto.stock > 0}" class="badge-ok">
+                        <i class="bi bi-check-circle-fill me-1"></i> En stock
+                    </span>
+                    <span th:if="${producto.stock == 0}" class="badge-pend">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Agotado
+                    </span>
+                </div>
+
+                <p class="text-muted mb-4" th:text="${producto.descripcion}">Descripción del producto</p>
+
+                <div class="gs-card p-4 mb-4">
+                    <h5 style="font-size: .95rem; color: var(--accent); margin-bottom: 1rem;">
+                        <i class="bi bi-info-circle me-2"></i>Especificaciones
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Categoría</small>
+                            <strong th:text="${producto.categoria.nombre}" style="color: var(--text-strong);">Cat</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Stock disponible</small>
+                            <strong th:text="${producto.stock} + ' unidades'" style="color: var(--text-strong);">0</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">SKU</small>
+                            <strong th:text="'GS-' + ${#strings.toString(producto.id)}" style="color: var(--text-strong);">GS-0</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Envío</small>
+                            <strong style="color: var(--success);">24-48h Lima</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA WhatsApp -->
+                <div>
+                    <a th:href="'https://wa.me/' + ${whatsappNumero} + '?text=Hola%20GamerStore,%20me%20interesa%20cotizar%20el%20producto%20*' + ${producto.nombre} + '*%20(SKU%20GS-' + ${producto.id} + ').%20¿Está%20disponible?'"
+                       target="_blank" class="btn btn-whatsapp btn-lg w-100">
+                        <i class="bi bi-whatsapp me-2"></i>Cotizar por WhatsApp
+                    </a>
+                    <p class="text-center text-muted small mt-2 mb-0">
+                        <i class="bi bi-shield-check me-1"></i> Respuesta inmediata · Asesor gamer · Sin compromiso
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RELACIONADOS -->
+        <div class="mt-5 pt-5" style="border-top: 1px solid var(--border);" th:if="${not #lists.isEmpty(relacionados)}">
+            <h2 class="section-title">También te puede interesar</h2>
+            <div class="row g-4">
+                <div class="col-sm-6 col-lg-3" th:each="r : ${relacionados}">
+                    <a th:href="@{/productos/{id}(id=${r.id})}" class="text-decoration-none">
+                        <div class="gs-card card">
+                            <img th:src="${r.imagen}" th:alt="${r.nombre}">
+                            <div class="card-body">
+                                <span class="badge-cat mb-2 d-inline-block" th:text="${r.categoria.nombre}">Cat</span>
+                                <h5 class="card-title" th:text="${r.nombre}">Nombre</h5>
+                                <span class="price" th:text="'S/ ' + ${#numbers.formatDecimal(r.precio, 1, 'COMMA', 2, 'POINT')}">S/ 0</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

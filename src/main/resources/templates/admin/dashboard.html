@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — GamerStore ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+    <th:block th:replace="~{admin/fragments/sidebar :: sidebar}"></th:block>
+
+    <div class="admin-main">
+        <th:block th:replace="~{admin/fragments/topbar :: topbar}"></th:block>
+
+        <main class="admin-content">
+            <!-- KPIs -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--accent-soft); color: var(--accent-2);">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Productos</div>
+                            <div class="stat-value" th:text="${totalProductos}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #e0e7ff; color: var(--accent);">
+                            <i class="bi bi-tags-fill"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Categorías</div>
+                            <div class="stat-value" th:text="${totalCategorias}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fce7f3; color: #be185d;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Clientes</div>
+                            <div class="stat-value" th:text="${totalClientes}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fef3c7; color: #92400e;">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <div>
+                            <div class="stat-label">Stock bajo</div>
+                            <div class="stat-value" th:text="${#lists.size(stockBajo)}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Stock bajo -->
+                <div class="col-lg-7">
+                    <div class="dash-panel">
+                        <div class="dash-panel-head">
+                            <h3><i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--warning);"></i>Stock bajo</h3>
+                            <a th:href="@{/admin/productos}" class="link-neon">Gestionar</a>
+                        </div>
+                        <div th:if="${#lists.isEmpty(stockBajo)}" class="text-center py-4 text-muted">
+                            <i class="bi bi-check-circle-fill" style="font-size: 2rem; color: var(--success);"></i>
+                            <p class="mb-0 mt-2">¡Todo el inventario está en buen nivel!</p>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6" th:each="p : ${stockBajo}">
+                                <div class="stock-alert-card">
+                                    <img th:src="${p.imagen}" th:alt="${p.nombre}">
+                                    <div class="flex-grow-1">
+                                        <div class="dash-row-title" th:text="${p.nombre}">Producto</div>
+                                        <div class="dash-row-sub">
+                                            Stock: <strong style="color: var(--warning);" th:text="${p.stock}">0</strong> unidades
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones rápidas -->
+                <div class="col-lg-5">
+                    <div class="dash-panel">
+                        <div class="dash-panel-head">
+                            <h3><i class="bi bi-lightning-charge-fill me-2" style="color: var(--accent-2);"></i>Acciones rápidas</h3>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/admin/productos}" class="btn btn-neon-outline text-start">
+                                <i class="bi bi-plus-circle me-2"></i>Gestionar productos
+                            </a>
+                            <a th:href="@{/admin/categorias}" class="btn btn-neon-outline text-start">
+                                <i class="bi bi-tag me-2"></i>Gestionar categorías
+                            </a>
+                            <a th:href="@{/admin/clientes}" class="btn btn-neon-outline text-start">
+                                <i class="bi bi-person-plus me-2"></i>Gestionar clientes
+                            </a>
+                            <a th:href="@{/}" class="btn btn-neon-outline text-start">
+                                <i class="bi bi-shop me-2"></i>Ver tienda pública
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
