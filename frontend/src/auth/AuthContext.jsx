@@ -1,19 +1,15 @@
 import { createContext, useContext, useState } from 'react'
 import { AuthAPI } from '../api/endpoints'
-import { TOKEN_KEY, USER_KEY, clearSession, getToken } from '../api/client'
+import { USER_KEY, clearSession, getUser } from '../api/client'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem(USER_KEY)
-    return raw ? JSON.parse(raw) : null
-  })
+  const [user, setUser] = useState(() => getUser())
 
   const login = async (username, password) => {
-    const res = await AuthAPI.login(username, password)
-    localStorage.setItem(TOKEN_KEY, res.token)
-    const u = { username: res.username, nombre: res.nombre, rol: res.rol }
+    // El backend valida y devuelve { username, nombre, rol }
+    const u = await AuthAPI.login(username, password)
     localStorage.setItem(USER_KEY, JSON.stringify(u))
     setUser(u)
     return u
@@ -25,7 +21,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuth: !!user && !!getToken() }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuth: !!user }}>
       {children}
     </AuthContext.Provider>
   )

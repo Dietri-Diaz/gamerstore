@@ -1,14 +1,12 @@
 # config/ — Configuración de Spring Boot
 
-Aquí van las clases que **configuran el comportamiento** de la aplicación (beans, interceptores, datos iniciales). No son lógica de negocio ni controladores.
+Aquí van las clases que **configuran el comportamiento** de la aplicación (beans, recursos, datos iniciales). No son lógica de negocio ni controladores.
 
 **Archivos:**
 
-- **`SecurityConfig.java`** — Define el `PasswordEncoder` (BCrypt). Lo inyectamos en `UsuarioService` para hashear/verificar contraseñas. Es nuestra única pieza de seguridad — no usamos Spring Security completo, solo el encoder.
+- **`PasswordConfig.java`** — Define el `PasswordEncoder` (BCrypt). Lo inyectamos en `UsuarioService` para hashear/verificar contraseñas. Es solo el codificador, no el framework de seguridad (Spring Security se agrega en el avance final).
 
-- **`AdminInterceptor.java`** — Implementa `HandlerInterceptor`. Antes de cualquier petición a `/admin/**`, verifica que la sesión tenga `rol = ADMIN`. Si no, redirige a `/auth/login`.
-
-- **`WebConfig.java`** — Registra el `AdminInterceptor` con Spring para que se aplique a las rutas `/admin/**`.
+- **`WebConfig.java`** — Configura dos cosas: (1) **CORS**, para que el front en desarrollo (Vite, `:5173`) pueda llamar a la API en `:8080`; y (2) el **fallback de la SPA**, que reenvía las rutas del front (ej. `/admin/productos`) al `index.html` de React cuando la app va compilada dentro del backend.
 
 - **`DataSeeder.java`** — Implementa `CommandLineRunner`. Se ejecuta automáticamente **una sola vez al arrancar la app** y siembra datos iniciales: 7 categorías, 12 productos, 5 clientes demo, y el admin por defecto (`admin123` / `gamerstore123`) con su password ya hasheado con BCrypt.
 

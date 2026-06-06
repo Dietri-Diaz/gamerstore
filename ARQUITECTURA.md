@@ -9,8 +9,9 @@ Arquitectura: **backend Spring Boot como API REST** + **frontend React (SPA)**.
 **Backend**
 - Java 17 (compila y corre en Java 21)
 - Spring Boot 3.5.6 — Spring Web (REST), Spring Data JPA + Hibernate
-- Spring Security + **JWT** (autenticación stateless) — jjwt 0.12.6
+- **Spring Validator** (Bean Validation) para validar los formularios
 - MariaDB/MySQL (XAMPP), BCrypt para passwords, Maven
+- (La seguridad con **Spring Security** se agrega en el avance final, Semana 18)
 
 **Frontend**
 - React 18 + React Router 6
@@ -89,22 +90,36 @@ Públicos (sin token):
 - `GET  /api/productos?categoria=&q=` — catálogo con filtros
 - `GET  /api/productos/{id}` — detalle + relacionados
 - `GET  /api/categorias` — categorías
-- `POST /api/auth/login` — devuelve `{ token, username, nombre, rol }`
+- `POST /api/auth/login` — valida y devuelve `{ username, nombre, rol }`
 
-Admin (requieren header `Authorization: Bearer <token>` y rol ADMIN):
+Admin (el panel; la protección con Spring Security llega en el avance final):
 
-- `GET  /api/auth/me`
 - `GET  /api/admin/dashboard`
 - `GET/POST/PUT/DELETE /api/admin/productos[/{id}]` · `PATCH /api/admin/productos/{id}/stock?delta=`
 - `GET/POST/PUT/DELETE /api/admin/categorias[/{id}]`
 - `GET/POST/PUT/DELETE /api/admin/clientes[/{id}]`
 
-## Autenticación (JWT)
+## Autenticación
 
 1. El front envía usuario/clave a `POST /api/auth/login`.
-2. `UsuarioService` valida con BCrypt y `JwtService` firma un token (HS256).
-3. El front guarda el token y lo manda en cada llamada a `/api/admin/**`.
-4. `JwtAuthFilter` valida el token en cada request y `SecurityConfig` exige rol ADMIN.
+2. `UsuarioService` valida la contraseña con **BCrypt** y devuelve los datos del admin.
+3. El front guarda esos datos y muestra el panel.
+
+La protección real de las rutas (Spring Security) se implementará en el **avance final
+(Semana 18)**, según la rúbrica del curso.
+
+## Validación de datos (Spring Validator)
+
+Los formularios validan en el backend con **Bean Validation** (`@Valid` en los
+controladores + anotaciones en los DTOs de `dto/`):
+
+- `@NotBlank`, `@Size` — campos de texto obligatorios y su longitud.
+- `@NotNull`, `@Min`, `@DecimalMin` — precio y stock del producto.
+- `@Pattern` — DNI de 8 dígitos y teléfono numérico del cliente.
+- `@Email` — correo del cliente.
+
+Si algún dato es inválido, la API responde `400` con un JSON
+`{ "error": "...", "errores": { campo: mensaje } }` y el formulario muestra el mensaje.
 
 ## Pruebas
 

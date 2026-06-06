@@ -1,24 +1,22 @@
-// Cliente HTTP minimo sobre fetch.
-// - Adjunta el JWT (si existe) en cada peticion.
-// - Ante un 401 limpia la sesion y manda al login.
-// - Normaliza los errores a Error(mensaje) leyendo { "error": "..." } del backend.
+// Cliente HTTP mínimo sobre fetch.
+// Normaliza los errores a Error(mensaje) leyendo { "error": "..." } del backend.
+// (La seguridad real con token/Spring Security se agregará en el avance final.)
 
 const BASE = '/api'
 
-export const TOKEN_KEY = 'gs_token'
 export const USER_KEY = 'gs_user'
 
-export const getToken = () => localStorage.getItem(TOKEN_KEY)
+export const getUser = () => {
+  const raw = localStorage.getItem(USER_KEY)
+  return raw ? JSON.parse(raw) : null
+}
 
 export function clearSession() {
-  localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
 }
 
 async function request(path, { method = 'GET', body } = {}) {
   const headers = {}
-  const token = getToken()
-  if (token) headers['Authorization'] = `Bearer ${token}`
   if (body !== undefined) headers['Content-Type'] = 'application/json'
 
   const res = await fetch(BASE + path, {
@@ -26,14 +24,6 @@ async function request(path, { method = 'GET', body } = {}) {
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
-
-  if (res.status === 401) {
-    clearSession()
-    if (window.location.pathname.startsWith('/admin')) {
-      window.location.href = '/admin/login'
-    }
-    throw new Error('Sesión expirada. Inicia sesión nuevamente.')
-  }
 
   if (!res.ok) {
     let msg = 'Ocurrió un error'

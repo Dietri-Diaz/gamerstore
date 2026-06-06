@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext.jsx'
-import { getToken } from '../../api/client.js'
+import { getUser } from '../../api/client.js'
 import Alert from '../../components/ui/Alert.jsx'
 
 export default function Login() {
@@ -13,7 +13,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (getToken()) navigate('/admin', { replace: true })
+    if (getUser()) navigate('/admin', { replace: true })
   }, [navigate])
 
   const submit = async (e) => {
