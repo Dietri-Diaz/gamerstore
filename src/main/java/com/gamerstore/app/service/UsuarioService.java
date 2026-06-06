@@ -27,4 +27,8 @@ public class UsuarioService {
     public Optional<Usuario> porId(Long id) {
         return repo.findById(id);
     }
+
+    public Optional<Usuario> porUsername(String username) {
+        return repo.findByUsername(username);
+    }
 }
