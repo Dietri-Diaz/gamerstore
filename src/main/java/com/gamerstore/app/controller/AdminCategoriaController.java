@@ -3,6 +3,7 @@ package com.gamerstore.app.controller;
 import com.gamerstore.app.dto.CategoriaDTO;
 import com.gamerstore.app.dto.CategoriaRequest;
 import com.gamerstore.app.service.CategoriaService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +26,12 @@ public class AdminCategoriaController {
     }
 
     @PostMapping
-    public CategoriaDTO crear(@RequestBody CategoriaRequest r) {
+    public CategoriaDTO crear(@Valid @RequestBody CategoriaRequest r) {
         return CategoriaDTO.from(categoriaService.crear(r.nombre()));
     }
 
     @PutMapping("/{id}")
-    public CategoriaDTO actualizar(@PathVariable Long id, @RequestBody CategoriaRequest r) {
+    public CategoriaDTO actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequest r) {
         categoriaService.actualizar(id, r.nombre());
         return CategoriaDTO.from(categoriaService.porId(id).orElseThrow());
     }

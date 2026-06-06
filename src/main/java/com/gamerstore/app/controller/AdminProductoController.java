@@ -4,6 +4,7 @@ import com.gamerstore.app.dto.ProductoDTO;
 import com.gamerstore.app.dto.ProductoRequest;
 import com.gamerstore.app.model.Producto;
 import com.gamerstore.app.service.ProductoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class AdminProductoController {
     }
 
     @PostMapping
-    public ProductoDTO crear(@RequestBody ProductoRequest r) {
+    public ProductoDTO crear(@Valid @RequestBody ProductoRequest r) {
         Producto p = productoService.crear(
                 r.nombre(),
                 r.descripcion(),
@@ -38,7 +39,7 @@ public class AdminProductoController {
     }
 
     @PutMapping("/{id}")
-    public ProductoDTO actualizar(@PathVariable Long id, @RequestBody ProductoRequest r) {
+    public ProductoDTO actualizar(@PathVariable Long id, @Valid @RequestBody ProductoRequest r) {
         productoService.actualizar(id, r.nombre(), r.descripcion(), r.precio(),
                 r.stock(), r.imagen(), r.categoriaId());
         return ProductoDTO.from(productoService.porId(id).orElseThrow());

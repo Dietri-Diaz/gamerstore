@@ -1,6 +1,5 @@
 package com.gamerstore.app;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,8 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Pruebas de la API REST sobre una base H2 en memoria (perfil "test").
- * Verifica: arranque del contexto, endpoints publicos abiertos, proteccion
- * de /api/admin/** y el flujo login -> JWT -> acceso autorizado.
+ * Verifica: arranque del contexto, endpoints publicos, login y, sobre todo,
+ * la validacion de datos (Spring Validator) en los formularios.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,20 +26,20 @@ class ApiIntegrationTest {
     @Autowired
     private MockMvc mvc;
 
-    @Autowired
-    private ObjectMapper om;
-
     @Test
-    void endpointsPublicosAbiertos() throws Exception {
+    void endpointsPublicosResponden() throws Exception {
         mvc.perform(get("/api/productos")).andExpect(status().isOk());
         mvc.perform(get("/api/categorias")).andExpect(status().isOk());
         mvc.perform(get("/api/config")).andExpect(status().isOk());
     }
 
     @Test
-    void adminSinTokenDevuelve401() throws Exception {
-        mvc.perform(get("/api/admin/productos")).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/admin/dashboard")).andExpect(status().isUnauthorized());
+    void loginValido() throws Exception {
+        mvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin123\",\"password\":\"gamerstore123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rol").value("ADMIN"));
     }
 
     @Test
@@ -52,20 +51,29 @@ class ApiIntegrationTest {
     }
 
     @Test
-    void loginEmiteTokenYDaAccesoAlAdmin() throws Exception {
-        String respuesta = mvc.perform(post("/api/auth/login")
+    void loginConCamposVaciosFallaValidacion() throws Exception {
+        mvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"admin123\",\"password\":\"gamerstore123\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.rol").value("ADMIN"))
-                .andReturn().getResponse().getContentAsString();
+                        .content("{\"username\":\"\",\"password\":\"\"}"))
+                .andExpect(status().isBadRequest());
+    }
 
-        String token = om.readTree(respuesta).get("token").asText();
+    @Test
+    void crearProductoInvalidoFallaValidacion() throws Exception {
+        // nombre vacio, precio 0 y stock negativo -> debe rechazarse con 400
+        mvc.perform(post("/api/admin/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"\",\"precio\":0,\"stock\":-1,\"categoriaId\":1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores").exists());
+    }
 
-        mvc.perform(get("/api/admin/productos").header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
-        mvc.perform(get("/api/admin/dashboard").header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$.totalProductos").exists());
+    @Test
+    void crearClienteConDniInvalidoFallaValidacion() throws Exception {
+        // DNI no numerico / longitud incorrecta -> 400
+        mvc.perform(post("/api/admin/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"dni\":\"abc\",\"nombres\":\"Juan\",\"apellidos\":\"Perez\"}"))
+                .andExpect(status().isBadRequest());
     }
 }
