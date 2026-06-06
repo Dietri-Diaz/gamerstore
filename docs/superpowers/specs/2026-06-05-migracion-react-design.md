@@ -135,4 +135,4 @@ frontend/
 8. Frontend: api client + auth + config contexts.
 9. Frontend: páginas públicas + layout.
 10. Frontend: páginas admin + layout.
-11. Frontend: `npm install` + `build`; verificar integración.
+11. Frontend: `npm install` + `build`; verificar integración
