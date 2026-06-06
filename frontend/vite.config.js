@@ -1,0 +1,18 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// En dev: Vite sirve el front en :5173 y proxea /api al backend Spring (:8080).
+// En build: la SPA se genera dentro de src/main/resources/static para servirla desde el JAR.
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': 'http://localhost:8080',
+    },
+  },
+  build: {
+    outDir: '../src/main/resources/static',
+    emptyOutDir: true,
+  },
+})

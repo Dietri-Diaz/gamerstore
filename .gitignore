@@ -23,3 +23,10 @@ target/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# SPA de React compilada (se genera con: cd frontend && npm run build)
+/src/main/resources/static/assets/
+/src/main/resources/static/index.html
+
+# Dependencias del frontend
+node_modules/
