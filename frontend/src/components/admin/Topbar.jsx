@@ -6,6 +6,7 @@ const TITLES = {
   '/admin/productos': 'Productos',
   '/admin/categorias': 'Categorías',
   '/admin/clientes': 'Clientes',
+  '/admin/pedidos': 'Pedidos',
 }
 
 export default function Topbar() {

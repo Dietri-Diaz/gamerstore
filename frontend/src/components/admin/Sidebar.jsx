@@ -6,6 +6,7 @@ const links = [
   { to: '/admin/productos', label: 'Productos', icon: 'bi-box-seam-fill' },
   { to: '/admin/categorias', label: 'Categorías', icon: 'bi-tags-fill' },
   { to: '/admin/clientes', label: 'Clientes', icon: 'bi-people-fill' },
+  { to: '/admin/pedidos', label: 'Pedidos', icon: 'bi-bag-check-fill' },
 ]
 
 export default function Sidebar({ onToggle, collapsed }) {
@@ -33,16 +34,6 @@ export default function Sidebar({ onToggle, collapsed }) {
             <span>{l.label}</span>
           </NavLink>
         ))}
-
-        <div className="sidebar-section">Próximamente</div>
-        <span className="sidebar-link disabled" title="POS (Avance 3)">
-          <i className="bi bi-cash-coin" />
-          <span>POS (Avance 3)</span>
-        </span>
-        <span className="sidebar-link disabled" title="Pedidos (Avance 3)">
-          <i className="bi bi-bag-check" />
-          <span>Pedidos (Avance 3)</span>
-        </span>
       </nav>
 
       <div className="sidebar-foot">

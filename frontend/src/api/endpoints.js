@@ -37,4 +37,9 @@ export const AdminAPI = {
   crearCliente: (data) => api.post('/admin/clientes', data),
   actualizarCliente: (id, data) => api.put('/admin/clientes/' + id, data),
   eliminarCliente: (id) => api.del('/admin/clientes/' + id),
+
+  pedidos: () => api.get('/admin/pedidos'),
+  crearPedido: (data) => api.post('/admin/pedidos', data),
+  actualizarPedido: (id, data) => api.put('/admin/pedidos/' + id, data),
+  eliminarPedido: (id) => api.del('/admin/pedidos/' + id),
 }

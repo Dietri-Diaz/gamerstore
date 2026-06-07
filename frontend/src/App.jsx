@@ -13,6 +13,7 @@ import Dashboard from './pages/admin/Dashboard.jsx'
 import AdminProductos from './pages/admin/AdminProductos.jsx'
 import AdminCategorias from './pages/admin/AdminCategorias.jsx'
 import AdminClientes from './pages/admin/AdminClientes.jsx'
+import AdminPedidos from './pages/admin/AdminPedidos.jsx'
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/admin/productos" element={<AdminProductos />} />
           <Route path="/admin/categorias" element={<AdminCategorias />} />
           <Route path="/admin/clientes" element={<AdminClientes />} />
+          <Route path="/admin/pedidos" element={<AdminPedidos />} />
         </Route>
       </Route>
 

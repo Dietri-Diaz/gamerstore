@@ -6,6 +6,7 @@ import {
   PieChart, Pie, Cell,
 } from 'recharts'
 import { AdminAPI } from '../../api/endpoints.js'
+import { money } from '../../utils/format.js'
 import Skeleton from '../../components/ui/Skeleton.jsx'
 
 // Colores para el gráfico de estado de stock
@@ -46,6 +47,8 @@ export default function Dashboard() {
     { label: 'Productos', value: data.totalProductos, icon: 'bi-box-seam-fill', bg: 'var(--accent-soft)', color: 'var(--accent)' },
     { label: 'Categorías', value: data.totalCategorias, icon: 'bi-tags-fill', bg: '#e0e7ff', color: 'var(--accent-hover)' },
     { label: 'Clientes', value: data.totalClientes, icon: 'bi-people-fill', bg: '#fce7f3', color: '#be185d' },
+    { label: 'Pedidos', value: data.totalPedidos, icon: 'bi-bag-check-fill', bg: '#dcfce7', color: '#15803d' },
+    { label: 'Ventas', value: money(data.totalVentas), icon: 'bi-cash-coin', bg: '#fef3c7', color: '#b45309' },
     { label: 'Stock bajo', value: data.stockBajo.length, icon: 'bi-exclamation-triangle-fill', bg: 'var(--warning-soft)', color: 'var(--warning-text)' },
   ]
 
