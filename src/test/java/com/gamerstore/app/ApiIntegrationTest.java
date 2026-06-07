@@ -76,4 +76,24 @@ class ApiIntegrationTest {
                         .content("{\"dni\":\"abc\",\"nombres\":\"Juan\",\"apellidos\":\"Perez\"}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void crearPedidoValido() throws Exception {
+        // cliente 1 y producto 1 vienen del DataSeeder
+        mvc.perform(post("/api/admin/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"clienteId\":1,\"metodoPago\":\"EFECTIVO\"," +
+                                "\"items\":[{\"productoId\":1,\"cantidad\":2}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("PENDIENTE"))
+                .andExpect(jsonPath("$.total").value(4998.0));
+    }
+
+    @Test
+    void crearPedidoSinItemsFallaValidacion() throws Exception {
+        mvc.perform(post("/api/admin/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"clienteId\":1,\"items\":[]}"))
+                .andExpect(status().isBadRequest());
+    }
 }
