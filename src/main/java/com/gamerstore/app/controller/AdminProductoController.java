@@ -2,6 +2,7 @@ package com.gamerstore.app.controller;
 
 import com.gamerstore.app.dto.ProductoDTO;
 import com.gamerstore.app.dto.ProductoRequest;
+import com.gamerstore.app.mapper.ProductoMapper;
 import com.gamerstore.app.model.Producto;
 import com.gamerstore.app.service.ProductoService;
 import jakarta.validation.Valid;
@@ -10,20 +11,22 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/** CRUD de productos (requiere rol ADMIN). */
+/** CRUD de productos (panel admin). */
 @RestController
 @RequestMapping("/api/admin/productos")
 public class AdminProductoController {
 
     private final ProductoService productoService;
+    private final ProductoMapper productoMapper;
 
-    public AdminProductoController(ProductoService productoService) {
+    public AdminProductoController(ProductoService productoService, ProductoMapper productoMapper) {
         this.productoService = productoService;
+        this.productoMapper = productoMapper;
     }
 
     @GetMapping
     public List<ProductoDTO> listar() {
-        return productoService.todos().stream().map(ProductoDTO::from).toList();
+        return productoService.todos().stream().map(productoMapper::toDTO).toList();
     }
 
     @PostMapping
@@ -35,20 +38,20 @@ public class AdminProductoController {
                 r.stock() != null ? r.stock() : 0,
                 r.imagen(),
                 r.categoriaId());
-        return ProductoDTO.from(p);
+        return productoMapper.toDTO(p);
     }
 
     @PutMapping("/{id}")
     public ProductoDTO actualizar(@PathVariable Long id, @Valid @RequestBody ProductoRequest r) {
         productoService.actualizar(id, r.nombre(), r.descripcion(), r.precio(),
                 r.stock(), r.imagen(), r.categoriaId());
-        return ProductoDTO.from(productoService.porId(id).orElseThrow());
+        return productoMapper.toDTO(productoService.porId(id).orElseThrow());
     }
 
     @PatchMapping("/{id}/stock")
     public ProductoDTO ajustarStock(@PathVariable Long id, @RequestParam int delta) {
         productoService.ajustarStock(id, delta);
-        return ProductoDTO.from(productoService.porId(id).orElseThrow());
+        return productoMapper.toDTO(productoService.porId(id).orElseThrow());
     }
 
     @DeleteMapping("/{id}")

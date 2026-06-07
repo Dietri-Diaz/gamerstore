@@ -2,6 +2,7 @@ package com.gamerstore.app.controller;
 
 import com.gamerstore.app.dto.ProductoDTO;
 import com.gamerstore.app.dto.ProductoDetalleDTO;
+import com.gamerstore.app.mapper.ProductoMapper;
 import com.gamerstore.app.model.Producto;
 import com.gamerstore.app.service.ProductoService;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +15,17 @@ import java.util.List;
 public class ProductoController {
 
     private final ProductoService productoService;
+    private final ProductoMapper productoMapper;
 
-    public ProductoController(ProductoService productoService) {
+    public ProductoController(ProductoService productoService, ProductoMapper productoMapper) {
         this.productoService = productoService;
+        this.productoMapper = productoMapper;
     }
 
     @GetMapping
     public List<ProductoDTO> listar(@RequestParam(required = false) String categoria,
                                     @RequestParam(required = false) String q) {
-        return productoService.filtrar(categoria, q).stream().map(ProductoDTO::from).toList();
+        return productoService.filtrar(categoria, q).stream().map(productoMapper::toDTO).toList();
     }
 
     @GetMapping("/{id}")
@@ -32,8 +35,8 @@ public class ProductoController {
                 productoService.porCategoria(p.getCategoria()).stream()
                         .filter(x -> !x.getId().equals(id))
                         .limit(4)
-                        .map(ProductoDTO::from)
+                        .map(productoMapper::toDTO)
                         .toList();
-        return new ProductoDetalleDTO(ProductoDTO.from(p), relacionados);
+        return new ProductoDetalleDTO(productoMapper.toDTO(p), relacionados);
     }
 }

@@ -2,6 +2,7 @@ package com.gamerstore.app.controller;
 
 import com.gamerstore.app.dto.CategoriaDTO;
 import com.gamerstore.app.dto.CategoriaRequest;
+import com.gamerstore.app.mapper.CategoriaMapper;
 import com.gamerstore.app.service.CategoriaService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -9,31 +10,33 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/** CRUD de categorias (requiere rol ADMIN). */
+/** CRUD de categorias (panel admin). */
 @RestController
 @RequestMapping("/api/admin/categorias")
 public class AdminCategoriaController {
 
     private final CategoriaService categoriaService;
+    private final CategoriaMapper categoriaMapper;
 
-    public AdminCategoriaController(CategoriaService categoriaService) {
+    public AdminCategoriaController(CategoriaService categoriaService, CategoriaMapper categoriaMapper) {
         this.categoriaService = categoriaService;
+        this.categoriaMapper = categoriaMapper;
     }
 
     @GetMapping
     public List<CategoriaDTO> listar() {
-        return categoriaService.listar().stream().map(CategoriaDTO::from).toList();
+        return categoriaService.listar().stream().map(categoriaMapper::toDTO).toList();
     }
 
     @PostMapping
     public CategoriaDTO crear(@Valid @RequestBody CategoriaRequest r) {
-        return CategoriaDTO.from(categoriaService.crear(r.nombre()));
+        return categoriaMapper.toDTO(categoriaService.crear(r.nombre()));
     }
 
     @PutMapping("/{id}")
     public CategoriaDTO actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequest r) {
         categoriaService.actualizar(id, r.nombre());
-        return CategoriaDTO.from(categoriaService.porId(id).orElseThrow());
+        return categoriaMapper.toDTO(categoriaService.porId(id).orElseThrow());
     }
 
     @DeleteMapping("/{id}")
