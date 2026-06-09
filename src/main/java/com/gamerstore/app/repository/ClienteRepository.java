@@ -9,5 +9,6 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     Optional<Cliente> findByDni(String dni);
     boolean existsByDni(String dni);
+    boolean existsByDniAndIdNot(String dni, Long id);
     List<Cliente> findAllByOrderByApellidosAscNombresAsc();
 }

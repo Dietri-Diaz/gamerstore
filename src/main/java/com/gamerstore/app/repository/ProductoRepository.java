@@ -9,4 +9,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto> findByNombreContainingIgnoreCase(String q);
     List<Producto> findByCategoriaNombreIgnoreCaseAndNombreContainingIgnoreCase(String categoria, String q);
     List<Producto> findByStockLessThanEqualOrderByStockAsc(int stock);
+    boolean existsByCategoriaId(Long categoriaId);
 }

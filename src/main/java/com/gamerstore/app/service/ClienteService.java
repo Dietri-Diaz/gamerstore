@@ -49,9 +49,15 @@ public class ClienteService {
     }
 
     @Transactional
-    public void actualizar(Long id, String nombres, String apellidos,
+    public void actualizar(Long id, String dni, String nombres, String apellidos,
                            String telefono, String email, String direccion) {
         Cliente c = repo.findById(id).orElseThrow();
+        if (dni != null && !dni.isBlank() && !dni.equals(c.getDni())) {
+            if (repo.existsByDniAndIdNot(dni.trim(), id)) {
+                throw new IllegalArgumentException("Ya existe otro cliente con el DNI " + dni.trim());
+            }
+            c.setDni(dni.trim());
+        }
         if (nombres != null && !nombres.isBlank()) c.setNombres(nombres);
         if (apellidos != null && !apellidos.isBlank()) c.setApellidos(apellidos);
         c.setTelefono(telefono);

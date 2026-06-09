@@ -1,5 +1,9 @@
 package com.gamerstore.app.controller;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 /** Convierte las excepciones en respuestas JSON limpias: { "error": "..." }. */
 @RestControllerAdvice
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         for (FieldError fe : e.getBindingResult().getFieldErrors()) {
             errores.putIfAbsent(fe.getField(), fe.getDefaultMessage());
         }
-        String resumen = String.join(" ", errores.values());
+        String resumen = String.join(". ", errores.values());
         Map<String, Object> resp = new LinkedHashMap<>();
         resp.put("error", resumen.isBlank() ? "Datos inválidos" : resumen);
         resp.put("errores", errores);
@@ -51,8 +51,28 @@ public class GlobalExceptionHandler {
         return body(HttpStatus.NOT_FOUND, "Recurso no encontrado");
     }
 
+    /**
+     * Red de seguridad para violaciones de integridad que no fueron interceptadas
+     * previamente en los servicios. Distingue entre restricción UNIQUE (duplicado)
+     * y restricción de FK (registro referenciado por otro).
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> conflict(DataIntegrityViolationException e) {
-        return body(HttpStatus.CONFLICT, "No se puede eliminar: tiene registros asociados");
+        String rootMsg = e.getRootCause() != null
+                ? e.getRootCause().getMessage().toLowerCase()
+                : "";
+
+        if (rootMsg.contains("foreign key") || rootMsg.contains("referential integrity")
+                || rootMsg.contains("fk_") || rootMsg.contains("constraint")) {
+            return body(HttpStatus.CONFLICT,
+                    "No se puede eliminar: el registro está siendo usado por otros datos");
+        }
+        if (rootMsg.contains("unique") || rootMsg.contains("duplicate entry")
+                || rootMsg.contains("already exists")) {
+            return body(HttpStatus.CONFLICT,
+                    "Ya existe un registro con esos datos");
+        }
+        return body(HttpStatus.CONFLICT, "Operación no permitida: conflicto de datos");
     }
 }
+

@@ -36,7 +36,7 @@ public class AdminClienteController {
 
     @PutMapping("/{id}")
     public ClienteDTO actualizar(@PathVariable Long id, @Valid @RequestBody ClienteRequest r) {
-        clienteService.actualizar(id, r.nombres(), r.apellidos(), r.telefono(), r.email(), r.direccion());
+        clienteService.actualizar(id, r.dni(), r.nombres(), r.apellidos(), r.telefono(), r.email(), r.direccion());
         return clienteMapper.toDTO(clienteService.porId(id).orElseThrow());
     }
 
