@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext.jsx'
 
+// Título a mostrar en la barra superior según la ruta actual del panel admin.
 const TITLES = {
   '/admin': 'Dashboard',
   '/admin/productos': 'Productos',
@@ -9,10 +10,12 @@ const TITLES = {
   '/admin/pedidos': 'Pedidos',
 }
 
+// Barra superior del panel admin: título de la sección actual y avatar/nombre
+// del usuario logueado (a la derecha).
 export default function Topbar() {
   const { user } = useAuth()
   const { pathname } = useLocation()
-  const title = TITLES[pathname] || 'Panel'
+  const title = TITLES[pathname] || 'Panel' // ruta sin título propio -> "Panel"
   const inicial = (user?.nombre || 'A').charAt(0).toUpperCase()
 
   return (

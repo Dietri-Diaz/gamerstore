@@ -12,14 +12,17 @@ import Skeleton from '../../components/ui/Skeleton.jsx'
 // Colores para el gráfico de estado de stock
 const COLORES_STOCK = ['#10b981', '#f59e0b', '#ef4444'] // ok, bajo, agotado
 
+// Dashboard del panel admin: KPIs generales, gráficos (recharts) de productos/stock y ranking de ventas
 export default function Dashboard() {
   const [data, setData] = useState(null)
   const [productos, setProductos] = useState([])
 
+  // Carga en paralelo los datos agregados del dashboard (KPIs, stock bajo, más vendidos) y el listado
+  // completo de productos, que se usa aquí mismo para armar los gráficos por categoría y por stock
   useEffect(() => {
     AdminAPI.dashboard()
       .then(setData)
-      .catch(() => setData({ totalProductos: 0, totalCategorias: 0, totalClientes: 0, stockBajo: [] }))
+      .catch(() => setData({ totalProductos: 0, totalCategorias: 0, totalClientes: 0, stockBajo: [], topProductos: [] }))
     AdminAPI.productos()
       .then(setProductos)
       .catch(() => setProductos([]))
@@ -71,6 +74,7 @@ export default function Dashboard() {
 
   return (
     <>
+      {/* Tarjetas de KPIs principales (productos, categorías, clientes, pedidos, ventas, stock bajo) */}
       <div className="stat-grid">
         {stats.map((s) => (
           <div key={s.label} className="stat-card">
@@ -91,6 +95,7 @@ export default function Dashboard() {
           <div className="panel-head">
             <h3><i className="bi bi-bar-chart-fill" style={{ color: 'var(--accent)' }} /> Productos por categoría</h3>
           </div>
+          {/* Gráfico de barras (recharts): cantidad de productos agrupados por categoría */}
           <div className="chart-box">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={porCategoria} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -108,6 +113,7 @@ export default function Dashboard() {
           <div className="panel-head">
             <h3><i className="bi bi-pie-chart-fill" style={{ color: 'var(--accent)' }} /> Estado del stock</h3>
           </div>
+          {/* Gráfico de dona (recharts): distribución del stock entre ok / bajo / agotado */}
           <div className="chart-box">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -162,8 +168,35 @@ export default function Dashboard() {
 
         <div className="panel">
           <div className="panel-head">
+            <h3><i className="bi bi-trophy-fill" style={{ color: 'var(--accent)' }} /> Más vendidos</h3>
+          </div>
+          {/* Ranking de productos más vendidos: ya viene calculado y ordenado desde el backend */}
+          {(!data.topProductos || data.topProductos.length === 0) ? (
+            <div className="empty"><i className="bi bi-bar-chart" /><p>Aún no hay ventas registradas</p></div>
+          ) : (
+            <div className="stock-list">
+              {data.topProductos.map((p, i) => (
+                <div key={p.productoId} className="stock-card">
+                  <img src={p.imagen} alt={p.productoNombre} />
+                  <div>
+                    <div className="fw-bold" style={{ fontSize: '0.9rem' }}>
+                      <span style={{ color: 'var(--accent)' }}>#{i + 1}</span> {p.productoNombre}
+                    </div>
+                    <div className="text-muted" style={{ fontSize: '0.82rem' }}>
+                      Vendidos: <strong style={{ color: 'var(--accent)' }}>{p.cantidad}</strong> unidades
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="panel">
+          <div className="panel-head">
             <h3><i className="bi bi-lightning-charge-fill" style={{ color: 'var(--accent)' }} /> Acciones rápidas</h3>
           </div>
+          {/* Atajos de navegación hacia las otras secciones del panel admin */}
           <div className="quick-actions">
             <Link to="/admin/productos" className="btn btn-outline"><i className="bi bi-box-seam" /> Gestionar productos</Link>
             <Link to="/admin/categorias" className="btn btn-outline"><i className="bi bi-tags" /> Gestionar categorías</Link>
