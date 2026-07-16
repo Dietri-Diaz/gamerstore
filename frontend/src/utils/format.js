@@ -1,3 +1,5 @@
+// Utilidades de formato de texto/numeros reutilizadas en vistas publicas y admin.
+
 // Formatea un precio como "S/ 1,234.50".
 export function money(value) {
   const n = Number(value || 0)

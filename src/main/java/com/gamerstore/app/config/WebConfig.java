@@ -10,6 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Sirve la SPA de React compilada (src/main/resources/static) y hace el "fallback":
@@ -26,6 +28,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
+    @Value("${app.uploads.dir}")
+    private String uploadsDir;
+
     // Permite que el front en desarrollo (Vite, :5173) llame a la API en :8080.
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -34,8 +39,17 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
     }
 
+    // Registra dos fuentes de archivos estaticos: las imagenes subidas (carpeta externa
+    // configurable) y el build de React empaquetado en resources/static, este ultimo con
+    // el resolver de fallback a index.html definido mas abajo.
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        Path uploads = Paths.get(uploadsDir).toAbsolutePath().normalize();
+        String uploadsLocation = uploads.toUri().toString();
+        if (!uploadsLocation.endsWith("/")) uploadsLocation += "/";
+        registry.addResourceHandler("/images/productos/**")
+                .addResourceLocations(uploadsLocation);
+
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
                 .resourceChain(true)

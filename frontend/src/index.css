@@ -476,3 +476,29 @@ img { max-width: 100%; display: block; }
   .admin-content { padding: 1rem; }
   .topbar { padding: 1rem; }
 }
+
+/* Contador de sesion discreto (esquina inferior derecha del admin) */
+.session-timer {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--muted, #6b7280);
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.session-timer i { font-size: 0.8rem; }
+.session-timer-low {
+  color: var(--warning-text, #b45309);
+  border-color: var(--warning, #f59e0b);
+  opacity: 1;
+}

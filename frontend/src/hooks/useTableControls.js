@@ -45,16 +45,20 @@ export function useTableControls(rows, { searchKeys = [], pageSize = 8, initialS
   const paginaActual = Math.min(page, totalPages)
   const paged = ordenadas.slice((paginaActual - 1) * pageSize, paginaActual * pageSize)
 
+  // Cambia la columna de orden; si ya se ordenaba por esa columna, invierte asc/desc.
+  // Vuelve a la pagina 1 porque el orden nuevo puede mover las filas de pagina.
   const toggleSort = (key) => {
     setPage(1)
     setSort((s) => (s && s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }))
   }
 
+  // Actualiza el texto de busqueda y regresa a la pagina 1 (misma razon que arriba)
   const onSearch = (valor) => {
     setQuery(valor)
     setPage(1)
   }
 
+  // Expone la pagina actual ya lista para pintar + los controles de busqueda/orden/paginacion
   return {
     paged,
     query,

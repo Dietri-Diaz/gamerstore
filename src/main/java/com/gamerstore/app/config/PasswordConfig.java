@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class PasswordConfig {
 
+    // Bean inyectable en toda la app (DataSeeder, servicios de auth, etc.) para
+    // encriptar contrasenas al guardarlas y verificarlas al hacer login.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
