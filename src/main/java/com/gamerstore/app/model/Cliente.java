@@ -3,6 +3,7 @@ package com.gamerstore.app.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+// Entidad Cliente: datos del cliente que realiza pedidos, mapea a la tabla "cliente"
 @Entity
 @Table(name = "cliente")
 public class Cliente {
@@ -11,6 +12,7 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // DNI único del cliente
     @Column(unique = true, nullable = false, length = 8)
     private String dni;
 
@@ -34,6 +36,7 @@ public class Cliente {
 
     public Cliente() {}
 
+    // Se ejecuta antes de insertar: si no viene fecha de registro, la setea a "ahora"
     @PrePersist
     protected void onCreate() {
         if (fechaRegistro == null) fechaRegistro = LocalDateTime.now();
@@ -56,5 +59,6 @@ public class Cliente {
     public LocalDateTime getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }
 
+    // Getter derivado: concatena nombres + apellidos
     public String getNombreCompleto() { return nombres + " " + apellidos; }
 }

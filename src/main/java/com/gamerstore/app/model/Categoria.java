@@ -2,6 +2,7 @@ package com.gamerstore.app.model;
 
 import jakarta.persistence.*;
 
+// Entidad Categoria: agrupa productos, mapea a la tabla "categoria"
 @Entity
 @Table(name = "categoria")
 public class Categoria {
@@ -9,6 +10,7 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Nombre único de la categoría
     @Column(nullable = false, unique = true)
     private String nombre;
 

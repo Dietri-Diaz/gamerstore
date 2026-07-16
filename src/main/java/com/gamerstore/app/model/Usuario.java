@@ -3,6 +3,7 @@ package com.gamerstore.app.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+// Entidad Usuario: cuenta de acceso al sistema (login), mapea a la tabla "usuario"
 @Entity
 @Table(name = "usuario")
 public class Usuario {
@@ -11,9 +12,11 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Username único para el login
     @Column(unique = true, nullable = false, length = 50)
     private String username;
 
+    // Email único del usuario
     @Column(unique = true, nullable = false, length = 120)
     private String email;
 
@@ -29,12 +32,14 @@ public class Usuario {
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
 
+    // Rol del usuario (USUARIO/ADMIN), guardado como texto en la BD
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Rol rol = Rol.ADMIN;
 
     public Usuario() {}
 
+    // Se ejecuta antes de insertar: fija fecha de registro y rol por defecto si faltan
     @PrePersist
     protected void onCreate() {
         if (fechaRegistro == null) fechaRegistro = LocalDateTime.now();

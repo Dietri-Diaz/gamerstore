@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CategoriaMapper {
 
+    // Convierte una Categoria (entidad) en CategoriaDTO
     public CategoriaDTO toDTO(Categoria c) {
         return new CategoriaDTO(c.getId(), c.getNombre());
     }

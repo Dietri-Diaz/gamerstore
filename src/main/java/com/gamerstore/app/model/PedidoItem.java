@@ -2,6 +2,7 @@ package com.gamerstore.app.model;
 
 import jakarta.persistence.*;
 
+// Entidad PedidoItem: una línea de producto dentro de un Pedido, mapea a la tabla "pedido_item"
 @Entity
 @Table(name = "pedido_item")
 public class PedidoItem {
@@ -9,10 +10,12 @@ public class PedidoItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relación N:1 con el Pedido al que pertenece esta línea
     @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 
+    // Relación N:1 con el Producto vendido en esta línea
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
@@ -41,5 +44,6 @@ public class PedidoItem {
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
     public double getPrecioUnitario() { return precioUnitario; }
     public void setPrecioUnitario(double precioUnitario) { this.precioUnitario = precioUnitario; }
+    // Getter derivado: cantidad * precio unitario
     public double getSubtotal() { return cantidad * precioUnitario; }
 }

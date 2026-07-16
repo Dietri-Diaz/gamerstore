@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+// Entidad Pedido: representa una venta/orden de un cliente, mapea a la tabla "pedido"
 @Entity
 @Table(name = "pedido")
 public class Pedido {
@@ -13,6 +14,7 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relación N:1 con Cliente (obligatoria)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
@@ -29,11 +31,13 @@ public class Pedido {
     @Column(name = "metodo_pago", length = 30)
     private String metodoPago;
 
+    // Relación 1:N con las líneas del pedido; se guardan/eliminan en cascada junto con el pedido
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PedidoItem> items = new ArrayList<>();
 
     public Pedido() {}
 
+    // Se ejecuta antes de insertar: fija fecha actual y estado por defecto si faltan
     @PrePersist
     protected void onCreate() {
         if (fecha == null) fecha = LocalDateTime.now();
@@ -55,6 +59,8 @@ public class Pedido {
     public List<PedidoItem> getItems() { return items; }
     public void setItems(List<PedidoItem> items) { this.items = items; }
 
+    // Getter derivado: código de pedido con formato PED-0001
     public String getCodigo() { return String.format("PED-%04d", id == null ? 0 : id); }
+    // Getter derivado: suma las cantidades de todas las líneas del pedido
     public int getCantidadTotal() { return items.stream().mapToInt(PedidoItem::getCantidad).sum(); }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 @Component
 public class PedidoMapper {
 
+    // Convierte un Pedido (entidad), incluyendo sus líneas, en PedidoDTO
     public PedidoDTO toDTO(Pedido p) {
         List<PedidoItemDTO> items = p.getItems().stream().map(this::toItemDTO).toList();
         return new PedidoDTO(
@@ -28,6 +29,7 @@ public class PedidoMapper {
         );
     }
 
+    // Convierte una línea de pedido (PedidoItem) en PedidoItemDTO
     public PedidoItemDTO toItemDTO(PedidoItem i) {
         return new PedidoItemDTO(
                 i.getId(),

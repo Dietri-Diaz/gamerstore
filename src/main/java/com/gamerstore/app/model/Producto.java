@@ -2,6 +2,7 @@ package com.gamerstore.app.model;
 
 import jakarta.persistence.*;
 
+// Entidad Producto: representa un producto del catálogo, mapea a la tabla "producto"
 @Entity
 @Table(name = "producto")
 public class Producto {
@@ -9,7 +10,8 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    // Nombre único del producto (no se permiten duplicados)
+    @Column(nullable = false, unique = true)
     private String nombre;
 
     @Column(length = 500)
@@ -23,6 +25,7 @@ public class Producto {
 
     private int stock;
 
+    // Relación N:1 con Categoria (carga EAGER)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;

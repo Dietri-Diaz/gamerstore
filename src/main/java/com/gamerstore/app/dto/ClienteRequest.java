@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+// Datos para crear/editar un cliente
 public record ClienteRequest(
         @NotBlank(message = "El DNI es obligatorio")
         @Pattern(regexp = "\\d{8}", message = "El DNI debe tener 8 dígitos")

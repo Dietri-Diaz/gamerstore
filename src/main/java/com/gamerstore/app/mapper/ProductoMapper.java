@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductoMapper {
 
+    // Convierte un Producto (entidad) en ProductoDTO
     public ProductoDTO toDTO(Producto p) {
         return new ProductoDTO(
                 p.getId(),

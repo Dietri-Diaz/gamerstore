@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClienteMapper {
 
+    // Convierte un Cliente (entidad) en ClienteDTO
     public ClienteDTO toDTO(Cliente c) {
         return new ClienteDTO(
                 c.getId(),
