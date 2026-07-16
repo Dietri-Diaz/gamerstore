@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AdminAPI } from '../../api/endpoints.js'
+import { downloadBlob } from '../../api/client.js'
 import { money } from '../../utils/format.js'
 import { useTableControls } from '../../hooks/useTableControls.js'
 import { useToast } from '../../components/ui/Toast.jsx'
@@ -21,6 +22,8 @@ function badgeEstado(estado) {
   return 'badge badge-warn' // PENDIENTE
 }
 
+// Página admin: gestión de pedidos (crear con ítems, editar estado/método de pago, eliminar y
+// descargar un reporte en PDF con filtros de fecha/estado)
 export default function AdminPedidos() {
   const toast = useToast()
   const confirm = useConfirm()
@@ -43,6 +46,25 @@ export default function AdminPedidos() {
   const [estadoEdit, setEstadoEdit] = useState('PENDIENTE')
   const [metodoEdit, setMetodoEdit] = useState('')
 
+  // Reporte PDF
+  const [repDesde, setRepDesde] = useState('')
+  const [repHasta, setRepHasta] = useState('')
+  const [repEstado, setRepEstado] = useState('')
+  const [descargando, setDescargando] = useState(false)
+
+  // Arma la URL del reporte con los filtros de fecha/estado elegidos y descarga el PDF resultante
+  const descargarPDF = async () => {
+    setDescargando(true)
+    try {
+      const url = AdminAPI.reportePedidosUrl({ desde: repDesde, hasta: repHasta, estado: repEstado })
+      await downloadBlob(url, 'reporte-pedidos.pdf')
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setDescargando(false)
+    }
+  }
+
   const t = useTableControls(pedidos || [], {
     searchKeys: ['codigo', 'clienteNombre', 'estado'],
     pageSize: 8,
@@ -51,6 +73,7 @@ export default function AdminPedidos() {
 
   const cargar = () => AdminAPI.pedidos().then(setPedidos).catch(() => setPedidos([]))
 
+  // Al montar, carga los pedidos y también clientes/productos (necesarios para el formulario de nuevo pedido)
   useEffect(() => {
     cargar()
     AdminAPI.clientes().then(setClientes).catch(() => setClientes([]))
@@ -67,6 +90,7 @@ export default function AdminPedidos() {
     setShowCrear(true)
   }
 
+  // Agrega el producto y cantidad elegidos en el "draft" a la lista de ítems del pedido en construcción
   const agregarItem = () => {
     if (!draft.productoId) return
     const prod = productos.find((p) => String(p.id) === String(draft.productoId))
@@ -76,10 +100,12 @@ export default function AdminPedidos() {
     setDraft({ productoId: '', cantidad: 1 })
   }
 
+  // Quita un ítem de la lista del pedido en construcción por su posición
   const quitarItem = (idx) => setItems((lista) => lista.filter((_, i) => i !== idx))
 
   const totalPedido = items.reduce((acc, it) => acc + it.precio * it.cantidad, 0)
 
+  // Valida y envía el pedido nuevo (cliente + ítems) a la API
   const guardar = async (e) => {
     e.preventDefault()
     setFormError('')
@@ -109,6 +135,7 @@ export default function AdminPedidos() {
     setMetodoEdit(p.metodoPago || '')
   }
 
+  // Guarda el nuevo estado y/o método de pago del pedido que se está editando
   const guardarEstado = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -124,6 +151,7 @@ export default function AdminPedidos() {
     }
   }
 
+  // Pide confirmación y elimina el pedido si el usuario acepta
   const eliminar = async (p) => {
     const ok = await confirm({
       title: 'Eliminar pedido',
@@ -155,9 +183,30 @@ export default function AdminPedidos() {
           <h2>Pedidos</h2>
           <p>Registra y gestiona las ventas de la tienda</p>
         </div>
-        <button className="btn btn-primary" onClick={abrirCrear}>
-          <i className="bi bi-bag-plus" /> Nuevo pedido
-        </button>
+        {/* Filtros de fecha/estado para el reporte, y botón para descargar el PDF con esos filtros */}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" style={{ fontSize: '0.72rem' }}>Desde</label>
+            <input className="input" type="date" value={repDesde} onChange={(e) => setRepDesde(e.target.value)} />
+          </div>
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" style={{ fontSize: '0.72rem' }}>Hasta</label>
+            <input className="input" type="date" value={repHasta} onChange={(e) => setRepHasta(e.target.value)} />
+          </div>
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label" style={{ fontSize: '0.72rem' }}>Estado</label>
+            <select className="select" value={repEstado} onChange={(e) => setRepEstado(e.target.value)}>
+              <option value="">Todos</option>
+              {ESTADOS.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <button className="btn btn-outline" onClick={descargarPDF} disabled={descargando}>
+            <i className="bi bi-file-earmark-pdf" /> {descargando ? 'Generando...' : 'Descargar PDF'}
+          </button>
+          <button className="btn btn-primary" onClick={abrirCrear}>
+            <i className="bi bi-bag-plus" /> Nuevo pedido
+          </button>
+        </div>
       </div>
 
       {pedidos === null ? (

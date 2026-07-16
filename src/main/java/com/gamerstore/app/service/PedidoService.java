@@ -12,9 +12,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/** Reglas de negocio de pedidos: alta con cálculo de total e ítems, reportes y estadísticas de ventas. */
 @Service
 public class PedidoService {
 
@@ -22,6 +24,7 @@ public class PedidoService {
     private final ClienteRepository clienteRepo;
     private final ProductoRepository productoRepo;
 
+    // Inyecta los repositorios de pedido, cliente y producto.
     public PedidoService(PedidoRepository pedidoRepo,
                          ClienteRepository clienteRepo,
                          ProductoRepository productoRepo) {
@@ -30,24 +33,40 @@ public class PedidoService {
         this.productoRepo = productoRepo;
     }
 
+    // Lista todos los pedidos, del más reciente al más antiguo.
     public List<Pedido> todos() {
         return pedidoRepo.findAllByOrderByFechaDesc();
     }
 
+    // Busca un pedido por id.
     public Optional<Pedido> porId(Long id) {
         return pedidoRepo.findById(id);
     }
 
+    // Cuenta el total de pedidos.
     public long total() {
         return pedidoRepo.count();
     }
 
+    // Suma el total vendido (campo total) de todos los pedidos.
     public double totalVentas() {
         return pedidoRepo.sumTotal();
     }
 
+    // Trae los productos más vendidos por cantidad, limitado a "limite" resultados.
     public List<Object[]> topProductos(int limite) {
         return pedidoRepo.topProductos(PageRequest.of(0, limite));
+    }
+
+    /** Filtra pedidos por rango de fecha (inclusive) y estado, para el reporte. */
+    public List<Pedido> reporte(LocalDate desde, LocalDate hasta, String estado) {
+        return todos().stream().filter(p -> {
+            LocalDate f = p.getFecha().toLocalDate();
+            if (desde != null && f.isBefore(desde)) return false;
+            if (hasta != null && f.isAfter(hasta)) return false;
+            if (estado != null && !estado.isBlank() && !estado.equalsIgnoreCase(p.getEstado())) return false;
+            return true;
+        }).toList();
     }
 
     /** Registra un pedido: arma sus lineas, calcula el total y lo guarda (cascade). */
@@ -82,6 +101,7 @@ public class PedidoService {
         return pedidoRepo.save(p);
     }
 
+    // Elimina un pedido por id.
     @Transactional
     public void eliminar(Long id) {
         pedidoRepo.deleteById(id);

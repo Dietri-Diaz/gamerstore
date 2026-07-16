@@ -11,6 +11,7 @@ import Pagination from '../../components/ui/Pagination.jsx'
 
 const EMPTY = { dni: '', nombres: '', apellidos: '', telefono: '', email: '', direccion: '' }
 
+// Página admin: CRUD de clientes, con autocompletar de nombres/apellidos consultando RENIEC por DNI
 export default function AdminClientes() {
   const toast = useToast()
   const confirm = useConfirm()
@@ -21,6 +22,7 @@ export default function AdminClientes() {
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
+  const [buscandoDni, setBuscandoDni] = useState(false)
 
   const t = useTableControls(clientes || [], {
     searchKeys: ['nombreCompleto', 'dni', 'email'],
@@ -30,10 +32,12 @@ export default function AdminClientes() {
 
   const cargar = () => AdminAPI.clientes().then(setClientes).catch(() => setClientes([]))
 
+  // Carga el listado de clientes al montar el componente
   useEffect(() => {
     cargar()
   }, [])
 
+  // Abre el modal en modo "crear": deja el formulario vacío
   const abrirCrear = () => {
     setEditing(null)
     setForm(EMPTY)
@@ -41,6 +45,7 @@ export default function AdminClientes() {
     setShowModal(true)
   }
 
+  // Abre el modal en modo "editar": precarga el formulario con los datos del cliente elegido
   const abrirEditar = (c) => {
     setEditing(c)
     setForm({
@@ -57,6 +62,7 @@ export default function AdminClientes() {
 
   const cambiar = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }))
 
+  // Envía el formulario: crea o actualiza el cliente según si estamos editando, y refresca la tabla
   const guardar = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -73,11 +79,33 @@ export default function AdminClientes() {
       cargar()
     } catch (err) {
       setFormError(err.message)
+      toast.error(err.message)
     } finally {
       setSaving(false)
     }
   }
 
+  // Valida el DNI (8 dígitos) y consulta RENIEC para autocompletar nombres y apellidos en el formulario
+  const buscarDni = async () => {
+    if (!/^\d{8}$/.test(form.dni)) {
+      setFormError('Ingresa un DNI de 8 dígitos')
+      return
+    }
+    setBuscandoDni(true)
+    setFormError('')
+    try {
+      const p = await AdminAPI.buscarDni(form.dni)
+      setForm((f) => ({ ...f, nombres: p.nombres, apellidos: p.apellidos }))
+      toast.success('Datos obtenidos de RENIEC')
+    } catch (err) {
+      setFormError(err.message)
+      toast.error(err.message)
+    } finally {
+      setBuscandoDni(false)
+    }
+  }
+
+  // Pide confirmación y elimina el cliente si el usuario acepta
   const eliminar = async (c) => {
     const ok = await confirm({
       title: 'Eliminar cliente',
@@ -204,16 +232,30 @@ export default function AdminClientes() {
             <div className="form-grid">
               <div className="field">
                 <label className="label">DNI *{editing && ' (no editable)'}</label>
-                <input
-                  className="input"
-                  value={form.dni}
-                  onChange={cambiar('dni')}
-                  pattern="[0-9]{8}"
-                  maxLength={8}
-                  placeholder="8 dígitos"
-                  required
-                  disabled={!!editing}
-                />
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    className="input"
+                    value={form.dni}
+                    onChange={cambiar('dni')}
+                    pattern="[0-9]{8}"
+                    maxLength={8}
+                    placeholder="8 dígitos"
+                    required
+                    disabled={!!editing}
+                  />
+                  {/* Botón que consulta RENIEC con el DNI y autocompleta nombres/apellidos (solo al crear) */}
+                  {!editing && (
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={buscarDni}
+                      disabled={buscandoDni}
+                      title="Autocompletar con RENIEC"
+                    >
+                      <i className="bi bi-search" /> {buscandoDni ? '...' : 'Buscar'}
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="field">
                 <label className="label">Teléfono</label>
