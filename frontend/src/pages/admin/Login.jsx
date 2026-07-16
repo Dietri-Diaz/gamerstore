@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/AuthContext.jsx'
 import { getUser } from '../../api/client.js'
 import Alert from '../../components/ui/Alert.jsx'
 
+// Página de login del panel admin (ERP)
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -12,10 +13,12 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Si ya hay una sesión guardada, saltamos directo al panel sin mostrar el formulario
   useEffect(() => {
     if (getUser()) navigate('/admin', { replace: true })
   }, [navigate])
 
+  // Envía usuario/contraseña, y si el login es correcto redirige al panel admin
   const submit = async (e) => {
     e.preventDefault()
     setError('')
