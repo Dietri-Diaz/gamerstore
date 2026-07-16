@@ -6,10 +6,12 @@ import { waUrl } from '../../utils/format.js'
 import ProductCard from '../../components/public/ProductCard.jsx'
 import ProductGridSkeleton from '../../components/public/ProductGridSkeleton.jsx'
 
+// Página de inicio pública: hero de bienvenida, razones para comprar y productos destacados
 export default function Home() {
   const { whatsappNumero } = useConfig()
   const [destacados, setDestacados] = useState(null)
 
+  // Al montar, trae los productos y muestra solo los primeros 8 como "destacados"
   useEffect(() => {
     PublicAPI.productos()
       .then((list) => setDestacados(list.slice(0, 8)))

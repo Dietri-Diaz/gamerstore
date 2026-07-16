@@ -22,6 +22,7 @@ public class CategoriaController {
         this.categoriaMapper = categoriaMapper;
     }
 
+    // GET /api/categorias: devuelve todas las categorías, usadas para armar los filtros del catálogo.
     @GetMapping
     public List<CategoriaDTO> listar() {
         return categoriaService.listar().stream().map(categoriaMapper::toDTO).toList();

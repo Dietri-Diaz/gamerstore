@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext.jsx'
 
+// Barra de navegación pública: logo, buscador, enlaces del sitio y acceso al panel
+// admin (o botón de salir si ya hay una sesión iniciada).
 export default function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [q, setQ] = useState('')
-  const [open, setOpen] = useState(false)
+  const [q, setQ] = useState('') // texto del buscador
+  const [open, setOpen] = useState(false) // menú móvil abierto/cerrado
 
+  // Al enviar el buscador, navega a /productos pasando el texto como query "q".
   const submit = (e) => {
     e.preventDefault()
     navigate('/productos' + (q ? '?q=' + encodeURIComponent(q) : ''))
@@ -34,6 +37,7 @@ export default function Navbar() {
           />
         </form>
 
+        {/* Botón hamburguesa: muestra/oculta el menú en pantallas chicas */}
         <button className="nav-toggle" onClick={() => setOpen((o) => !o)} aria-label="Menú">
           <i className="bi bi-list" />
         </button>
@@ -49,6 +53,7 @@ export default function Navbar() {
             Contacto
           </NavLink>
 
+          {/* Si hay sesión iniciada: link al panel y botón de salir. Si no: link al login admin */}
           {user ? (
             <>
               <Link to="/admin" className="nav-link" onClick={close}>

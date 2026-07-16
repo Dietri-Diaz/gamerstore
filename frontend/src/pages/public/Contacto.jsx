@@ -1,6 +1,7 @@
 import { useConfig } from '../../config/ConfigContext.jsx'
 import { waUrl } from '../../utils/format.js'
 
+// Datos de contacto de la tienda que se listan en la sección "Información"
 const info = [
   { icon: 'bi-geo-alt-fill', label: 'Ubicación', value: 'Lima, Perú', sub: 'Atención presencial con cita previa' },
   { icon: 'bi-envelope-fill', label: 'Email', value: 'hola@gamerstore.gg', sub: 'Respuesta en 24h hábiles' },
@@ -8,12 +9,14 @@ const info = [
   { icon: 'bi-truck', label: 'Envíos', value: 'Todo Perú', sub: '24-48h en Lima · 3 días provincia' },
 ]
 
+// Pasos del proceso de compra, mostrados en la sección "¿Cómo comprar?"
 const pasos = [
   { n: '1', t: 'Elige tu producto', d: 'Explora el catálogo y elige el equipo que necesitas.' },
   { n: '2', t: 'Cotiza por WhatsApp', d: 'Haz click en "Cotizar" y nuestro asesor te confirma stock y precio final.' },
   { n: '3', t: 'Paga y recibe', d: 'Coordinamos pago, envío o recojo en tienda. ¡Listo para jugar!' },
 ]
 
+// Página de contacto público: acceso directo a WhatsApp, datos de la tienda y pasos para comprar
 export default function Contacto() {
   const { whatsappNumero } = useConfig()
 

@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { money } from '../../utils/format.js'
 
+// Tarjeta de un producto para el catálogo: imagen, categoría, nombre, precio y
+// enlace hacia su página de detalle.
 export default function ProductCard({ p }) {
   return (
     <Link to={`/productos/${p.id}`} className="product-card">

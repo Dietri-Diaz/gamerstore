@@ -6,12 +6,14 @@ import { money, waUrl, sku } from '../../utils/format.js'
 import ProductCard from '../../components/public/ProductCard.jsx'
 import Spinner from '../../components/ui/Spinner.jsx'
 
+// Página de detalle de un producto público: info completa, especificaciones y productos relacionados
 export default function ProductoDetalle() {
   const { id } = useParams()
   const { whatsappNumero } = useConfig()
   const [data, setData] = useState(null)
   const [error, setError] = useState(false)
 
+  // Carga el producto (y sus relacionados) cada vez que cambia el id en la URL
   useEffect(() => {
     setData(null)
     setError(false)
@@ -21,6 +23,7 @@ export default function ProductoDetalle() {
       .catch(() => setError(true))
   }, [id])
 
+  // Si el producto no existe o falló la carga, mostramos un estado de "no encontrado"
   if (error) {
     return (
       <section className="section container">
@@ -35,6 +38,7 @@ export default function ProductoDetalle() {
     )
   }
 
+  // Mientras no lleguen los datos del producto, mostramos un spinner de carga
   if (!data) {
     return (
       <section className="section container">
@@ -121,6 +125,7 @@ export default function ProductoDetalle() {
         </div>
       </div>
 
+      {/* Sección de productos relacionados, solo se muestra si el backend devolvió alguno */}
       {relacionados.length > 0 && (
         <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
           <h2 className="section-title">También te puede interesar</h2>

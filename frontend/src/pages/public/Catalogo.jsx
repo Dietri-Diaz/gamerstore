@@ -4,6 +4,7 @@ import { PublicAPI } from '../../api/endpoints.js'
 import ProductCard from '../../components/public/ProductCard.jsx'
 import ProductGridSkeleton from '../../components/public/ProductGridSkeleton.jsx'
 
+// Página de catálogo público: lista productos filtrando por categoría y/o búsqueda de texto (query params)
 export default function Catalogo() {
   const [searchParams, setSearchParams] = useSearchParams()
   const categoria = searchParams.get('categoria') || ''
@@ -13,12 +14,14 @@ export default function Catalogo() {
   const [productos, setProductos] = useState(null)
   const [search, setSearch] = useState(q)
 
+  // Carga la lista de categorías una sola vez al montar, para armar el filtro lateral
   useEffect(() => {
     PublicAPI.categorias()
       .then((list) => setCategorias(list.map((c) => c.nombre)))
       .catch(() => setCategorias([]))
   }, [])
 
+  // Recarga los productos cada vez que cambia la categoría o el texto de búsqueda en la URL
   useEffect(() => {
     setProductos(null)
     PublicAPI.productos(categoria, q)
@@ -27,6 +30,7 @@ export default function Catalogo() {
     setSearch(q)
   }, [categoria, q])
 
+  // Actualiza los query params al elegir una categoría desde el filtro lateral
   const aplicarCategoria = (cat) => {
     const next = {}
     if (cat) next.categoria = cat
@@ -34,6 +38,7 @@ export default function Catalogo() {
     setSearchParams(next)
   }
 
+  // Maneja el submit del formulario de búsqueda: actualiza los query params con el texto ingresado
   const buscar = (e) => {
     e.preventDefault()
     const next = {}

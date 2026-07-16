@@ -22,12 +22,14 @@ public class ProductoController {
         this.productoMapper = productoMapper;
     }
 
+    // GET /api/productos: lista productos del catálogo, filtrando opcionalmente por categoría y/o texto de búsqueda.
     @GetMapping
     public List<ProductoDTO> listar(@RequestParam(required = false) String categoria,
                                     @RequestParam(required = false) String q) {
         return productoService.filtrar(categoria, q).stream().map(productoMapper::toDTO).toList();
     }
 
+    // GET /api/productos/{id}: trae el detalle de un producto y hasta 4 productos relacionados de su misma categoría.
     @GetMapping("/{id}")
     public ProductoDetalleDTO detalle(@PathVariable Long id) {
         Producto p = productoService.porId(id).orElseThrow();

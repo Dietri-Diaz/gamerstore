@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom'
 import { useConfig } from '../../config/ConfigContext.jsx'
 import { waUrl } from '../../utils/format.js'
 
+// Pie de página público: datos de la marca, navegación, categorías y contacto.
 export default function Footer() {
   const { whatsappNumero } = useConfig()
 
   return (
     <footer className="footer">
       <div className="container">
+        {/* Grid de 4 columnas: marca+redes, navegación, categorías y contacto */}
         <div className="footer-grid">
           <div>
             <h5>
