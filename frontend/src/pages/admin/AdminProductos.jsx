@@ -12,6 +12,7 @@ import Pagination from '../../components/ui/Pagination.jsx'
 
 const EMPTY = { nombre: '', descripcion: '', precio: '', stock: '', imagen: '', categoriaId: '' }
 
+// Página admin: CRUD de productos del catálogo (crear, editar, eliminar y subir imagen)
 export default function AdminProductos() {
   const toast = useToast()
   const confirm = useConfirm()
@@ -23,6 +24,7 @@ export default function AdminProductos() {
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
+  const [subiendo, setSubiendo] = useState(false)
 
   // Tabla: búsqueda + orden + paginación
   const t = useTableControls(productos || [], {
@@ -33,11 +35,13 @@ export default function AdminProductos() {
 
   const cargar = () => AdminAPI.productos().then(setProductos).catch(() => setProductos([]))
 
+  // Al montar, carga los productos y las categorías (estas últimas alimentan el <select> del formulario)
   useEffect(() => {
     cargar()
     AdminAPI.categorias().then(setCategorias).catch(() => setCategorias([]))
   }, [])
 
+  // Abre el modal en modo "crear": deja el formulario vacío
   const abrirCrear = () => {
     setEditing(null)
     setForm(EMPTY)
@@ -45,6 +49,7 @@ export default function AdminProductos() {
     setShowModal(true)
   }
 
+  // Abre el modal en modo "editar": precarga el formulario con los datos del producto elegido
   const abrirEditar = (p) => {
     setEditing(p)
     setForm({
@@ -61,6 +66,7 @@ export default function AdminProductos() {
 
   const cambiar = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }))
 
+  // Envía el formulario: crea o actualiza el producto según si estamos editando, y refresca la tabla
   const guardar = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -85,11 +91,33 @@ export default function AdminProductos() {
       cargar()
     } catch (err) {
       setFormError(err.message)
+      toast.error(err.message)
     } finally {
       setSaving(false)
     }
   }
 
+  // Sube la imagen elegida al backend (como FormData) y guarda la URL devuelta en el formulario
+  const subirImagen = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setSubiendo(true)
+    setFormError('')
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { url } = await AdminAPI.subirImagen(fd)
+      setForm((f) => ({ ...f, imagen: url }))
+      toast.success('Imagen subida')
+    } catch (err) {
+      setFormError(err.message)
+      toast.error(err.message)
+    } finally {
+      setSubiendo(false)
+    }
+  }
+
+  // Pide confirmación y elimina el producto si el usuario acepta
   const eliminar = async (p) => {
     const ok = await confirm({
       title: 'Eliminar producto',
@@ -241,9 +269,27 @@ export default function AdminProductos() {
                   ))}
                 </select>
               </div>
+              {/* Subida de imagen: muestra vista previa si ya hay una, y permite elegir un archivo nuevo */}
               <div className="field full">
-                <label className="label">URL imagen</label>
-                <input className="input" type="url" placeholder="https://..." value={form.imagen} onChange={cambiar('imagen')} />
+                <label className="label">Imagen del producto</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  {form.imagen ? (
+                    <img
+                      src={form.imagen}
+                      alt="preview"
+                      style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }}
+                    />
+                  ) : (
+                    <div style={{ width: 64, height: 64, borderRadius: 8, background: 'var(--border)', display: 'grid', placeItems: 'center' }}>
+                      <i className="bi bi-image text-muted" />
+                    </div>
+                  )}
+                  <label className="btn btn-outline" style={{ cursor: 'pointer', margin: 0 }}>
+                    <i className="bi bi-upload" /> {subiendo ? 'Subiendo...' : 'Subir imagen'}
+                    <input type="file" accept="image/*" hidden onChange={subirImagen} disabled={subiendo} />
+                  </label>
+                </div>
+                <small className="text-muted">Se guarda en el proyecto (uploads/productos). Máx 5MB.</small>
               </div>
             </div>
             <button type="submit" hidden />

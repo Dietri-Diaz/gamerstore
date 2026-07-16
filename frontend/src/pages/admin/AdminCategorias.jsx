@@ -9,6 +9,7 @@ import TableToolbar from '../../components/ui/TableToolbar.jsx'
 import TableSkeleton from '../../components/ui/TableSkeleton.jsx'
 import Pagination from '../../components/ui/Pagination.jsx'
 
+// Página admin: CRUD de categorías de productos
 export default function AdminCategorias() {
   const toast = useToast()
   const confirm = useConfirm()
@@ -28,10 +29,12 @@ export default function AdminCategorias() {
 
   const cargar = () => AdminAPI.categorias().then(setCategorias).catch(() => setCategorias([]))
 
+  // Carga las categorías al montar el componente
   useEffect(() => {
     cargar()
   }, [])
 
+  // Abre el modal en modo "crear": deja el nombre vacío
   const abrirCrear = () => {
     setEditing(null)
     setNombre('')
@@ -39,6 +42,7 @@ export default function AdminCategorias() {
     setShowModal(true)
   }
 
+  // Abre el modal en modo "editar": precarga el nombre de la categoría elegida
   const abrirEditar = (c) => {
     setEditing(c)
     setNombre(c.nombre)
@@ -46,6 +50,7 @@ export default function AdminCategorias() {
     setShowModal(true)
   }
 
+  // Envía el formulario: crea o actualiza la categoría según si estamos editando, y refresca la tabla
   const guardar = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -62,11 +67,13 @@ export default function AdminCategorias() {
       cargar()
     } catch (err) {
       setFormError(err.message)
+      toast.error(err.message)
     } finally {
       setSaving(false)
     }
   }
 
+  // Pide confirmación y elimina la categoría si el usuario acepta (falla si tiene productos asociados)
   const eliminar = async (c) => {
     const ok = await confirm({
       title: 'Eliminar categoría',

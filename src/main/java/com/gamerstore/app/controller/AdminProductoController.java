@@ -24,11 +24,13 @@ public class AdminProductoController {
         this.productoMapper = productoMapper;
     }
 
+    // GET /api/admin/productos: lista todos los productos (incluidos los sin stock) para el panel admin.
     @GetMapping
     public List<ProductoDTO> listar() {
         return productoService.todos().stream().map(productoMapper::toDTO).toList();
     }
 
+    // POST /api/admin/productos: valida el body y delega en el service la creación del producto.
     @PostMapping
     public ProductoDTO crear(@Valid @RequestBody ProductoRequest r) {
         Producto p = productoService.crear(
@@ -41,6 +43,7 @@ public class AdminProductoController {
         return productoMapper.toDTO(p);
     }
 
+    // PUT /api/admin/productos/{id}: valida y actualiza los datos del producto indicado.
     @PutMapping("/{id}")
     public ProductoDTO actualizar(@PathVariable Long id, @Valid @RequestBody ProductoRequest r) {
         productoService.actualizar(id, r.nombre(), r.descripcion(), r.precio(),
@@ -48,12 +51,14 @@ public class AdminProductoController {
         return productoMapper.toDTO(productoService.porId(id).orElseThrow());
     }
 
+    // PATCH /api/admin/productos/{id}/stock: suma (o resta, si delta es negativo) unidades al stock del producto.
     @PatchMapping("/{id}/stock")
     public ProductoDTO ajustarStock(@PathVariable Long id, @RequestParam int delta) {
         productoService.ajustarStock(id, delta);
         return productoMapper.toDTO(productoService.porId(id).orElseThrow());
     }
 
+    // DELETE /api/admin/productos/{id}: elimina el producto delegando en el service.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         productoService.eliminar(id);

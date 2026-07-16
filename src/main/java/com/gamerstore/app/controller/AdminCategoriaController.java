@@ -23,22 +23,26 @@ public class AdminCategoriaController {
         this.categoriaMapper = categoriaMapper;
     }
 
+    // GET /api/admin/categorias: lista todas las categorías para el panel admin.
     @GetMapping
     public List<CategoriaDTO> listar() {
         return categoriaService.listar().stream().map(categoriaMapper::toDTO).toList();
     }
 
+    // POST /api/admin/categorias: valida y crea una categoría nueva.
     @PostMapping
     public CategoriaDTO crear(@Valid @RequestBody CategoriaRequest r) {
         return categoriaMapper.toDTO(categoriaService.crear(r.nombre()));
     }
 
+    // PUT /api/admin/categorias/{id}: valida y actualiza el nombre de la categoría.
     @PutMapping("/{id}")
     public CategoriaDTO actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequest r) {
         categoriaService.actualizar(id, r.nombre());
         return categoriaMapper.toDTO(categoriaService.porId(id).orElseThrow());
     }
 
+    // DELETE /api/admin/categorias/{id}: elimina la categoría.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         categoriaService.eliminar(id);
