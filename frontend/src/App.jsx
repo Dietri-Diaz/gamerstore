@@ -8,6 +8,7 @@ import ProductoDetalle from './pages/public/ProductoDetalle.jsx'
 import Contacto from './pages/public/Contacto.jsx'
 import Carrito from './pages/public/Carrito.jsx'
 import Checkout from './pages/public/Checkout.jsx'
+import Seguimiento from './pages/public/Seguimiento.jsx'
 
 // Panel de administracion: requiere estar logueado (ver ProtectedRoute)
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
@@ -37,6 +38,8 @@ export default function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/carrito" element={<Carrito />} />
         <Route path="/checkout" element={<Checkout />} />
+        {/* Seguimiento del pedido: publico, se verifica con codigo + DNI (sin login) */}
+        <Route path="/seguimiento" element={<Seguimiento />} />
       </Route>
 
       {/* Login admin (sin layout) */}

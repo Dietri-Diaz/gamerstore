@@ -32,6 +32,9 @@ export const PublicAPI = {
   checkout: (data) => api.post('/checkout', data),
   // Boleta publica de un pedido, verificada por DNI del comprador
   boletaUrl: (pedidoCodigo, dni) => '/checkout/boleta/' + pedidoCodigo + qs({ dni }),
+  // Seguimiento publico del pedido: sin login, pero se verifica con el DNI del comprador
+  // (igual que la boleta) para que nadie pueda espiar pedidos ajenos adivinando codigos.
+  seguimiento: (codigo, dni) => api.get('/checkout/seguimiento/' + codigo + qs({ dni })),
 }
 
 // --- Admin: CRUD completo del panel, requiere estar logueado (token JWT) ---
@@ -63,6 +66,9 @@ export const AdminAPI = {
   actualizarPedido: (id, data) => api.put('/admin/pedidos/' + id, data),
   eliminarPedido: (id) => api.del('/admin/pedidos/' + id),
   reportePedidosUrl: (params) => '/admin/pedidos/reporte.pdf' + qs(params || {}),
+  // Anular una venta ya pagada: el backend repone el stock, devuelve el dinero
+  // y anula la boleta, todo en una sola transaccion. No se puede deshacer.
+  anularPedido: (id, motivo) => api.post('/admin/pedidos/' + id + '/anular', { motivo }),
 
   // Comprobantes (boletas) emitidos: registro de ventas + resumen + descarga en PDF
   comprobantes: (params) => api.get('/admin/comprobantes' + qs(params || {})),

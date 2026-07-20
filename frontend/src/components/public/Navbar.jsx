@@ -51,6 +51,9 @@ export default function Navbar() {
           <NavLink to="/productos" className="nav-link" onClick={close}>
             Catálogo
           </NavLink>
+          <NavLink to="/seguimiento" className="nav-link" onClick={close}>
+            Seguimiento
+          </NavLink>
           <NavLink to="/contacto" className="nav-link" onClick={close}>
             Contacto
           </NavLink>

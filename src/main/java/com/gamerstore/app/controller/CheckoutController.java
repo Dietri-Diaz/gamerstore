@@ -3,11 +3,13 @@ package com.gamerstore.app.controller;
 import com.gamerstore.app.dto.CheckoutClienteDTO;
 import com.gamerstore.app.dto.CheckoutRequest;
 import com.gamerstore.app.dto.CheckoutResponse;
+import com.gamerstore.app.dto.SeguimientoDTO;
 import com.gamerstore.app.dto.VerificarClienteRequest;
 import com.gamerstore.app.model.Comprobante;
 import com.gamerstore.app.service.BoletaPdfService;
 import com.gamerstore.app.service.CheckoutService;
 import com.gamerstore.app.service.ComprobanteService;
+import com.gamerstore.app.service.SeguimientoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,12 +26,14 @@ public class CheckoutController {
     private final CheckoutService checkoutService;
     private final ComprobanteService comprobanteService;
     private final BoletaPdfService boletaPdfService;
+    private final SeguimientoService seguimientoService;
 
     public CheckoutController(CheckoutService checkoutService, ComprobanteService comprobanteService,
-                              BoletaPdfService boletaPdfService) {
+                              BoletaPdfService boletaPdfService, SeguimientoService seguimientoService) {
         this.checkoutService = checkoutService;
         this.comprobanteService = comprobanteService;
         this.boletaPdfService = boletaPdfService;
+        this.seguimientoService = seguimientoService;
     }
 
     // POST /api/checkout: compra desde la tienda pública (crea cliente si es nuevo, pedido y pago).
@@ -43,6 +47,14 @@ public class CheckoutController {
     @PostMapping("/cliente")
     public CheckoutClienteDTO verificarCliente(@Valid @RequestBody VerificarClienteRequest req) {
         return checkoutService.verificarCliente(req.dni(), req.email());
+    }
+
+    // GET /api/checkout/seguimiento/{pedidoCodigo}?dni=XXXXXXXX -> el comprador rastrea su pedido.
+    // Misma idea que la descarga de boleta: es pública (sin login) pero verificada con el DNI del
+    // cliente del pedido, así nadie ve el pedido de otro probando códigos correlativos.
+    @GetMapping("/seguimiento/{pedidoCodigo}")
+    public SeguimientoDTO seguimiento(@PathVariable String pedidoCodigo, @RequestParam String dni) {
+        return seguimientoService.consultar(pedidoCodigo, dni);
     }
 
     // GET /api/checkout/boleta/{pedidoCodigo}?dni=XXXXXXXX -> el comprador descarga su boleta.

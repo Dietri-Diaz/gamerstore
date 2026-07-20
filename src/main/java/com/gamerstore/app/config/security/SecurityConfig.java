@@ -62,6 +62,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/checkout", "/api/checkout/**").permitAll()
                 // El comprador descarga su propia boleta sin loguearse (queda verificado con su DNI en el controller).
                 .requestMatchers(HttpMethod.GET, "/api/checkout/boleta/**").permitAll()
+                // Igual que la boleta: el seguimiento del pedido es publico pero pide el DNI del
+                // cliente, que se verifica en SeguimientoService antes de devolver nada.
+                .requestMatchers(HttpMethod.GET, "/api/checkout/seguimiento/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reniec/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()

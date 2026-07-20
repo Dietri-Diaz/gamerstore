@@ -749,3 +749,61 @@ img { max-width: 100%; display: block; }
 .detalle-nota { color: var(--faint); font-size: 0.72rem; font-weight: 400; }
 .detalle-vacio { color: var(--muted); font-size: 0.88rem; margin: 0; }
 .detalle-aviso { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-xs); padding: 0.85rem 1rem; color: var(--muted); font-size: 0.88rem; flex-wrap: wrap; }
+
+/* =================== SEGUIMIENTO PUBLICO DEL PEDIDO =================== */
+.seguimiento-form { max-width: 620px; margin-bottom: 1.75rem; }
+.seguimiento-resultado { display: flex; flex-direction: column; gap: 1.25rem; }
+.seguimiento-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+.seguimiento-cabecera > div { display: flex; flex-direction: column; gap: 0.2rem; }
+.seguimiento-codigo { font-size: 1.25rem; font-weight: 800; color: var(--accent); font-family: 'SFMono-Regular', Consolas, monospace; }
+
+/* Aviso rojo cuando el pedido fue anulado: se ve antes que cualquier otro dato */
+.seguimiento-anulado { display: flex; align-items: flex-start; gap: 0.8rem; background: var(--danger-soft); border: 1px solid #fecaca; border-radius: var(--r); padding: 1.1rem 1.25rem; color: var(--danger-text); }
+.seguimiento-anulado > i { font-size: 1.6rem; margin-top: 0.1rem; }
+.seguimiento-anulado > div { display: flex; flex-direction: column; gap: 0.25rem; }
+.seguimiento-anulado strong { font-size: 1rem; }
+.seguimiento-anulado small { color: var(--muted); }
+
+/* Linea de tiempo vertical con los pasos del pedido (los pasos los arma el backend) */
+.linea-tiempo { list-style: none; margin: 0; padding: 0; }
+.lt-paso { position: relative; display: flex; gap: 0.9rem; padding-bottom: 1.5rem; }
+.lt-paso:last-child { padding-bottom: 0; }
+/* La linea que une un paso con el siguiente: se dibuja bajo el punto, salvo en el ultimo */
+.lt-paso::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--border-strong); }
+.lt-paso:last-child::before { display: none; }
+.lt-paso.done::before { background: var(--success); }
+.lt-punto {
+  width: 32px; height: 32px; min-width: 32px; border-radius: 50%; z-index: 1;
+  display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+  background: var(--surface); border: 2px solid var(--border-strong); color: var(--faint);
+}
+.lt-cuerpo { display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.3rem; }
+.lt-cuerpo strong { color: var(--muted); font-size: 0.95rem; }
+.lt-cuerpo small { color: var(--faint); font-size: 0.82rem; }
+/* Paso ya alcanzado: check verde */
+.lt-paso.done .lt-punto { background: var(--success-soft); border-color: var(--success); color: var(--success); }
+.lt-paso.done .lt-cuerpo strong { color: var(--text-strong); }
+/* Paso actual: resaltado en el color de acento */
+.lt-paso.actual .lt-punto { background: var(--accent-grad); border-color: transparent; color: #fff; box-shadow: var(--shadow-sm); }
+.lt-paso.actual .lt-cuerpo strong { color: var(--accent); }
+.lt-actual { align-self: flex-start; margin-top: 0.25rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; background: var(--accent-soft); color: var(--accent); padding: 2px 9px; border-radius: 30px; }
+/* Pedido anulado/cancelado: el unico paso se pinta en rojo */
+.lt-paso.cancel .lt-punto { background: var(--danger-soft); border-color: var(--danger); color: var(--danger-text); }
+.lt-paso.cancel .lt-cuerpo strong { color: var(--danger-text); }
+.lt-paso.cancel .lt-actual { background: var(--danger-soft); color: var(--danger-text); }
+
+/* =================== CHECKOUT: PASO DE ENTREGA =================== */
+/* Direccion de la tienda cuando el comprador elige recojo (no se le pide nada mas) */
+.entrega-tienda { display: flex; align-items: flex-start; gap: 0.7rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.9rem 1rem; }
+.entrega-tienda > i { font-size: 1.2rem; color: var(--accent); margin-top: 0.1rem; }
+.entrega-tienda > div { display: flex; flex-direction: column; gap: 0.2rem; }
+.entrega-tienda strong { color: var(--text-strong); font-size: 0.9rem; }
+.entrega-tienda span { color: var(--text); font-size: 0.9rem; }
+.entrega-tienda small { font-size: 0.8rem; }
+/* Campos que aparecen solo al elegir delivery */
+.entrega-campos { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 1rem 1rem 0.25rem; }
+
+/* Fila atenuada en el registro de ventas: boleta anulada (sigue listada, no cuenta en los totales).
+   El badge ANULADA no se atenua: es justamente lo que hay que ver de un vistazo. */
+.fila-anulada { opacity: 0.6; background: var(--surface-2); }
+.fila-anulada .badge-danger { opacity: 1; }
