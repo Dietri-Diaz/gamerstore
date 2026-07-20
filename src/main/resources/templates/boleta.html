@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>Boleta</title>
+<style>
+    /* Tamaño de hoja y margenes del PDF (A4, margen generoso para que respire el contenido) */
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        color: #1e293b;
+        font-size: 11pt;
+        margin: 0;
+    }
+    p { margin: 0 0 7px 0; }
+
+    /* ===== 1. Cabecera: empresa a la izquierda, recuadro de la boleta a la derecha ===== */
+    table.encabezado { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    table.encabezado td { vertical-align: top; padding: 0; }
+    .empresa-nombre { font-size: 21pt; font-weight: bold; color: #4f46e5; margin: 0 0 10px 0; }
+    .empresa-direccion { font-size: 9.5pt; color: #64748b; margin: 0 0 4px 0; line-height: 1.6; }
+
+    .recuadro-boleta { border: 2px solid #1e1b4b; border-radius: 6px; text-align: center; }
+    .recuadro-boleta .ruc-linea { padding: 13px 10px 9px 10px; font-size: 10.5pt; font-weight: bold; color: #1e1b4b; }
+    .recuadro-boleta .titulo-franja { background: #1e1b4b; color: #ffffff; font-size: 11pt; font-weight: bold; padding: 9px 8px; }
+    .recuadro-boleta .codigo { padding: 14px 10px 16px 10px; font-size: 17pt; font-weight: bold; color: #1e1b4b; }
+
+    /* ===== 2. Datos del cliente y del comprobante ===== */
+    .tarjeta-cliente { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 20px; margin: 0 0 32px 0; }
+    table.tarjeta-cols { width: 100%; border-collapse: collapse; }
+    table.tarjeta-cols td { vertical-align: top; padding: 0; font-size: 10pt; }
+    .etiqueta { color: #64748b; font-weight: bold; }
+    .ref-pago { font-size: 9pt; color: #94a3b8; margin-top: 3px; }
+
+    /* ===== 3. Tabla de items ===== */
+    table.items { width: 100%; border-collapse: collapse; margin: 0 0 28px 0; }
+    table.items thead th { background: #1e1b4b; color: #ffffff; font-size: 9.5pt; padding: 13px 9px; text-align: left; }
+    table.items thead th.col-cant { text-align: center; }
+    table.items thead th.col-num { text-align: right; }
+    table.items tbody td { padding: 13px 9px; border-bottom: 1px solid #e2e8f0; font-size: 10pt; }
+    table.items tbody tr.par { background: #f8fafc; }
+    table.items td.col-cant { text-align: center; }
+    table.items td.col-num { text-align: right; }
+
+    /* ===== 4. Totales ===== */
+    table.totales-wrap { width: 100%; border-collapse: collapse; margin: 0 0 30px 0; }
+    table.totales-wrap td { vertical-align: top; padding: 0; }
+    table.totales { border-collapse: collapse; }
+    table.totales td { padding: 9px 14px; font-size: 10pt; white-space: nowrap; }
+    table.totales td.lbl { text-align: right; color: #475569; }
+    table.totales td.val { text-align: right; font-weight: bold; }
+    table.totales tr.fila-total td { background: #1e1b4b; color: #ffffff; font-size: 12.5pt; font-weight: bold; padding: 11px 14px; }
+
+    /* ===== 5. Importe en letras ===== */
+    .en-letras { border: 1px dashed #94a3b8; border-radius: 6px; padding: 16px 18px; font-size: 10pt; font-style: italic; color: #334155; margin: 0 0 34px 0; }
+
+    /* ===== 6. Pie: texto legal + QR ===== */
+    table.pie { width: 100%; border-collapse: collapse; margin-bottom: 34px; }
+    table.pie td { vertical-align: top; }
+    .pie-legal { font-size: 8.5pt; color: #64748b; line-height: 1.7; padding-right: 20px; }
+    .pie-qr { text-align: center; }
+    .pie-qr img { width: 115px; height: 115px; }
+    .pie-qr .qr-leyenda { font-size: 8pt; color: #94a3b8; margin-top: 6px; }
+
+    /* ===== 7. Aviso DEMO obligatorio ===== */
+    .aviso-demo { background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; text-align: center; border-radius: 6px; padding: 14px; }
+    .aviso-demo .principal { font-size: 10pt; font-weight: bold; margin: 0; }
+    .aviso-demo .secundario { font-size: 8.5pt; color: #7f1d1d; margin: 5px 0 0 0; }
+</style>
+</head>
+<body>
+
+    <!-- 1. Cabecera -->
+    <table class="encabezado">
+        <tr>
+            <td style="width:60%;">
+                <p class="empresa-nombre" th:text="${empresa.razonSocial}">GamerStore S.A.C.</p>
+                <p class="empresa-direccion" th:text="${empresa.direccion}">Av. Ejemplo 123, Lima</p>
+                <p class="empresa-direccion">RUC: <span th:text="${empresa.ruc}">20601234567</span></p>
+            </td>
+            <td style="width:40%;">
+                <div class="recuadro-boleta">
+                    <div class="ruc-linea">R.U.C. <span th:text="${empresa.ruc}">20601234567</span></div>
+                    <div class="titulo-franja">BOLETA DE VENTA ELECTRÓNICA</div>
+                    <div class="codigo" th:text="${c.codigo}">B001-00000001</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- 2. Datos del cliente y del comprobante -->
+    <div class="tarjeta-cliente">
+        <table class="tarjeta-cols">
+            <tr>
+                <td style="width:55%;">
+                    <p><span class="etiqueta">Señor(es): </span><span th:text="${#strings.isEmpty(c.clienteNombre) ? '—' : c.clienteNombre}">Cliente de ejemplo</span></p>
+                    <p><span class="etiqueta">DNI: </span><span th:text="${#strings.isEmpty(c.clienteDni) ? '—' : c.clienteDni}">00000000</span></p>
+                    <p><span class="etiqueta">Dirección: </span><span th:text="${#strings.isEmpty(c.clienteDireccion) ? '—' : c.clienteDireccion}">—</span></p>
+                </td>
+                <td style="width:45%;">
+                    <p><span class="etiqueta">Fecha de emisión: </span><span th:text="${fechaTexto}">01/01/2026 00:00</span></p>
+                    <p><span class="etiqueta">Moneda: </span>SOLES</p>
+                    <p><span class="etiqueta">Forma de pago: </span><span th:text="${#strings.isEmpty(c.metodoPago) ? '—' : c.metodoPago}">—</span></p>
+                    <p class="ref-pago" th:if="${!#strings.isEmpty(c.referenciaPago)}">Ref.: <span th:text="${c.referenciaPago}">—</span></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 3. Tabla de items -->
+    <table class="items">
+        <thead>
+            <tr>
+                <th class="col-cant" style="width:10%;">CANT.</th>
+                <th style="width:48%;">DESCRIPCIÓN</th>
+                <th class="col-num" style="width:21%;">P. UNIT.</th>
+                <th class="col-num" style="width:21%;">IMPORTE</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item, itemStat : ${items}" th:classappend="${itemStat.odd} ? 'par' : ''">
+                <td class="col-cant" th:text="${item.cantidad}">1</td>
+                <td th:text="${item.producto != null ? item.producto.nombre : '—'}">Producto de ejemplo</td>
+                <td class="col-num" th:text="${#numbers.formatDecimal(item.precioUnitario, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="col-num" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- 4. Totales -->
+    <table class="totales-wrap">
+        <tr>
+            <td style="width:50%;">&#160;</td>
+            <td style="width:50%; text-align:right;">
+                <table class="totales" style="margin-left:auto;">
+                    <tr>
+                        <td class="lbl">OP. GRAVADA</td>
+                        <td class="val" th:text="'S/ ' + ${#numbers.formatDecimal(c.subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="lbl">I.G.V. (18%)</td>
+                        <td class="val" th:text="'S/ ' + ${#numbers.formatDecimal(c.igv, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                    </tr>
+                    <tr class="fila-total">
+                        <td class="lbl">IMPORTE TOTAL</td>
+                        <td class="val" th:text="'S/ ' + ${#numbers.formatDecimal(c.total, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- 5. Importe en letras -->
+    <p class="en-letras" th:text="${enLetras}">SON: CIEN CON 00/100 SOLES</p>
+
+    <!-- 6. Pie: texto legal + QR -->
+    <table class="pie">
+        <tr>
+            <td class="pie-legal" style="width:68%;">
+                Representación impresa de la Boleta de Venta Electrónica. Consulte su comprobante en el portal de SUNAT.
+            </td>
+            <td class="pie-qr" style="width:32%;">
+                <img th:src="${qr}" alt="QR" />
+                <p class="qr-leyenda">Representación del comprobante</p>
+            </td>
+        </tr>
+    </table>
+
+    <!-- 7. Aviso DEMO (obligatorio) -->
+    <div class="aviso-demo">
+        <p class="principal">DOCUMENTO DE DEMOSTRACIÓN — SIN VALIDEZ TRIBUTARIA (no transmitido a SUNAT)</p>
+        <p class="secundario">Proyecto académico. La emisión electrónica real requiere RUC y certificado digital.</p>
+    </div>
+
+</body>
+</html>

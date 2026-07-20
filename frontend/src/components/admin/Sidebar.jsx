@@ -8,6 +8,7 @@ const links = [
   { to: '/admin/categorias', label: 'Categorías', icon: 'bi-tags-fill' },
   { to: '/admin/clientes', label: 'Clientes', icon: 'bi-people-fill' },
   { to: '/admin/pedidos', label: 'Pedidos', icon: 'bi-bag-check-fill' },
+  { to: '/admin/ventas', label: 'Ventas', icon: 'bi-receipt-cutoff' },
   { to: '/admin/usuarios', label: 'Usuarios', icon: 'bi-person-badge-fill' },
 ]
 
