@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { AdminAPI } from '../../api/endpoints.js'
+import { AdminAPI, PagosAPI } from '../../api/endpoints.js'
 import { downloadBlob } from '../../api/client.js'
 import { money } from '../../utils/format.js'
 import { useTableControls } from '../../hooks/useTableControls.js'
+import { useAutoClear } from '../../hooks/useAutoClear.js'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { useConfirm } from '../../components/ui/Confirm.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -10,9 +11,11 @@ import Alert from '../../components/ui/Alert.jsx'
 import TableToolbar from '../../components/ui/TableToolbar.jsx'
 import TableSkeleton from '../../components/ui/TableSkeleton.jsx'
 import Pagination from '../../components/ui/Pagination.jsx'
+import PasarelaPago from '../../components/admin/PasarelaPago.jsx'
 
 const ESTADOS = ['PENDIENTE', 'PAGADO', 'ENVIADO', 'ENTREGADO', 'CANCELADO']
-const METODOS = ['EFECTIVO', 'TARJETA', 'YAPE', 'PLIN', 'TRANSFERENCIA']
+// Solo estos dos: toda venta pasa por la pasarela (Stripe) o Yape.
+const METODOS = ['TARJETA', 'YAPE']
 
 // Clase de color para el badge según el estado del pedido
 function badgeEstado(estado) {
@@ -35,7 +38,7 @@ export default function AdminPedidos() {
   // Modal "nuevo pedido"
   const [showCrear, setShowCrear] = useState(false)
   const [clienteId, setClienteId] = useState('')
-  const [metodoPago, setMetodoPago] = useState('EFECTIVO')
+  const [metodoPago, setMetodoPago] = useState('TARJETA')
   const [items, setItems] = useState([])
   const [draft, setDraft] = useState({ productoId: '', cantidad: 1 })
   const [formError, setFormError] = useState('')
@@ -45,6 +48,13 @@ export default function AdminPedidos() {
   const [editing, setEditing] = useState(null)
   const [estadoEdit, setEstadoEdit] = useState('PENDIENTE')
   const [metodoEdit, setMetodoEdit] = useState('')
+
+  // Modal "cobrar" (pasarela de pagos): guarda el pedido que se esta cobrando
+  const [cobrando, setCobrando] = useState(null)
+
+  // Modal "ver detalle": pedido + el pago con el que se cobró + su boleta
+  const [detalle, setDetalle] = useState(null)
+  const [cargandoDetalle, setCargandoDetalle] = useState(false)
 
   // Reporte PDF
   const [repDesde, setRepDesde] = useState('')
@@ -71,6 +81,9 @@ export default function AdminPedidos() {
     initialSort: { key: 'id', dir: 'desc' },
   })
 
+  // El mensaje de error del formulario se borra solo a los 5s (no se queda estático).
+  useAutoClear(formError, setFormError)
+
   const cargar = () => AdminAPI.pedidos().then(setPedidos).catch(() => setPedidos([]))
 
   // Al montar, carga los pedidos y también clientes/productos (necesarios para el formulario de nuevo pedido)
@@ -83,7 +96,7 @@ export default function AdminPedidos() {
   // ---- Crear pedido ----
   const abrirCrear = () => {
     setClienteId('')
-    setMetodoPago('EFECTIVO')
+    setMetodoPago('TARJETA')
     setItems([])
     setDraft({ productoId: '', cantidad: 1 })
     setFormError('')
@@ -148,6 +161,50 @@ export default function AdminPedidos() {
       toast.error(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  // Descarga la boleta (PDF) del pedido ya pagado.
+  const descargarBoleta = async (p) => {
+    try {
+      await downloadBlob(AdminAPI.boletaPedidoUrl(p.id), 'boleta-' + p.codigo + '.pdf')
+    } catch (err) {
+      toast.error(err.message)
+    }
+  }
+
+  // Abre el detalle del pedido: sus ítems, el pago con el que se cobró y su boleta.
+  const verDetalle = async (p) => {
+    setCargandoDetalle(true)
+    setDetalle({ pedido: p, pago: null, boleta: null })
+    try {
+      // Nota: el listado de pagos vive en PagosAPI (no en AdminAPI), pero pega al mismo /admin/pagos
+      const [pagos, boletas] = await Promise.all([PagosAPI.listar(), AdminAPI.comprobantes()])
+      const pago = pagos.filter((x) => x.pedidoId === p.id).sort((a, b) => b.id - a.id)[0] || null
+      const boleta = boletas.find((c) => c.pedidoId === p.id) || null
+      setDetalle({ pedido: p, pago, boleta })
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setCargandoDetalle(false)
+    }
+  }
+
+  // Descarga el comprobante en PDF del pago mostrado en el detalle
+  const descargarComprobantePago = async (pago) => {
+    try {
+      await downloadBlob(PagosAPI.comprobanteUrl(pago.id), 'comprobante-' + pago.codigo + '.pdf')
+    } catch (err) {
+      toast.error(err.message)
+    }
+  }
+
+  // Descarga la boleta desde el detalle del pedido (usa el código propio de la boleta, no del pedido)
+  const descargarBoletaDetalle = async (pedidoId, boletaCodigo) => {
+    try {
+      await downloadBlob(AdminAPI.boletaPedidoUrl(pedidoId), 'boleta-' + boletaCodigo + '.pdf')
+    } catch (err) {
+      toast.error(err.message)
     }
   }
 
@@ -248,6 +305,19 @@ export default function AdminPedidos() {
                     <td><span className={badgeEstado(p.estado)}>{p.estado}</span></td>
                     <td>
                       <div className="cell-actions">
+                        <button className="btn btn-outline btn-icon" onClick={() => verDetalle(p)} title="Ver detalle">
+                          <i className="bi bi-eye" />
+                        </button>
+                        {p.estado !== 'PAGADO' && p.estado !== 'CANCELADO' && (
+                          <button className="btn btn-success btn-icon" onClick={() => setCobrando(p)} title="Cobrar">
+                            <i className="bi bi-credit-card" />
+                          </button>
+                        )}
+                        {p.estado === 'PAGADO' && (
+                          <button className="btn btn-outline btn-icon" onClick={() => descargarBoleta(p)} title="Ver boleta">
+                            <i className="bi bi-receipt" />
+                          </button>
+                        )}
                         <button className="btn btn-outline btn-icon" onClick={() => abrirEditar(p)} title="Editar estado">
                           <i className="bi bi-pencil" />
                         </button>
@@ -383,6 +453,175 @@ export default function AdminPedidos() {
             </div>
             <button type="submit" hidden />
           </form>
+        </Modal>
+      )}
+
+      {/* Modal de la pasarela de pagos (cobrar un pedido pendiente) */}
+      {cobrando && (
+        <PasarelaPago
+          pedido={cobrando}
+          onClose={() => setCobrando(null)}
+          onPagado={() => { setCobrando(null); cargar() }}
+        />
+      )}
+
+      {/* Modal "ver detalle": ítems del pedido + el pago con el que se cobró + su boleta, todo junto */}
+      {detalle && (
+        <Modal
+          title={`Pedido ${detalle.pedido.codigo}`}
+          icon="bi-eye"
+          size="lg"
+          onClose={() => setDetalle(null)}
+          footer={<button className="btn btn-ghost" onClick={() => setDetalle(null)}>Cerrar</button>}
+        >
+          {/* Cabecera: estado y fecha */}
+          <div className="detalle-cabecera">
+            <span className={badgeEstado(detalle.pedido.estado)}>{detalle.pedido.estado}</span>
+            <span className="detalle-fecha">
+              {detalle.pedido.fecha ? new Date(detalle.pedido.fecha).toLocaleString('es-PE') : '—'}
+            </span>
+          </div>
+          <div className="detalle-dato-simple"><strong>Cliente:</strong> {detalle.pedido.clienteNombre}</div>
+
+          {/* Ítems del pedido: ya vienen incluidos en el pedido de la lista, no hace falta pedirlos aparte */}
+          <div className="detalle-seccion">
+            <h4><i className="bi bi-bag" /> Ítems</h4>
+            <div className="table-wrap">
+              <div className="table-scroll">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>P. Unit.</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(detalle.pedido.items || []).map((it) => (
+                      <tr key={it.id}>
+                        <td>{it.productoNombre}</td>
+                        <td>{it.cantidad}</td>
+                        <td>{money(it.precioUnitario)}</td>
+                        <td>{money(it.subtotal)}</td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td colSpan={3} style={{ textAlign: 'right' }}><strong>Total</strong></td>
+                      <td><strong>{money(detalle.pedido.total)}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Pago: con qué se cobró el pedido (si ya se cobró) */}
+          <div className="detalle-seccion">
+            <h4><i className="bi bi-credit-card" /> Pago</h4>
+            {cargandoDetalle ? (
+              <p className="detalle-vacio">Cargando...</p>
+            ) : detalle.pago ? (
+              <>
+                <div className="detalle-datos-grid">
+                  <div className="detalle-dato">
+                    <span>Código</span>
+                    <strong>{detalle.pago.codigo}</strong>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>Método</span>
+                    <span className={detalle.pago.metodo === 'YAPE' ? 'badge badge-yape' : 'badge badge-tarjeta'}>
+                      {detalle.pago.metodo}
+                    </span>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>Estado</span>
+                    <span className={detalle.pago.estado === 'APROBADO' ? 'badge badge-ok' : 'badge badge-danger'}>
+                      {detalle.pago.estado}
+                    </span>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>Monto</span>
+                    <strong>{money(detalle.pago.monto)}</strong>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>Referencia</span>
+                    <strong>{detalle.pago.referencia || '—'}</strong>
+                    <small className="detalle-nota">
+                      {detalle.pago.referencia && detalle.pago.referencia.startsWith('pi_')
+                        ? 'ID de la transacción en Stripe'
+                        : 'N° de operación de Yape o código de autorización'}
+                    </small>
+                  </div>
+                  {detalle.pago.tarjetaUlt4 && (
+                    <div className="detalle-dato">
+                      <span>Tarjeta</span>
+                      <strong>•••• {detalle.pago.tarjetaUlt4}</strong>
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="btn btn-outline btn-sm"
+                  style={{ marginTop: '0.75rem' }}
+                  onClick={() => descargarComprobantePago(detalle.pago)}
+                >
+                  <i className="bi bi-file-earmark-pdf" /> Comprobante de pago
+                </button>
+              </>
+            ) : (
+              <div className="detalle-aviso">
+                <span>Este pedido aún no ha sido cobrado</span>
+                {detalle.pedido.estado !== 'PAGADO' && detalle.pedido.estado !== 'CANCELADO' && (
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => { const pedido = detalle.pedido; setDetalle(null); setCobrando(pedido) }}
+                  >
+                    <i className="bi bi-credit-card" /> Cobrar ahora
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Boleta: documento contable del pedido, se emite al aprobarse el pago */}
+          <div className="detalle-seccion">
+            <h4><i className="bi bi-receipt" /> Boleta</h4>
+            {cargandoDetalle ? (
+              <p className="detalle-vacio">Cargando...</p>
+            ) : detalle.boleta ? (
+              <>
+                <div className="detalle-datos-grid">
+                  <div className="detalle-dato">
+                    <span>Código</span>
+                    <strong>{detalle.boleta.codigo}</strong>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>Op. gravada</span>
+                    <strong>{money(detalle.boleta.subtotal)}</strong>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>IGV (18%)</span>
+                    <strong>{money(detalle.boleta.igv)}</strong>
+                  </div>
+                  <div className="detalle-dato">
+                    <span>Total</span>
+                    <strong>{money(detalle.boleta.total)}</strong>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-outline btn-sm"
+                  style={{ marginTop: '0.75rem' }}
+                  onClick={() => descargarBoletaDetalle(detalle.pedido.id, detalle.boleta.codigo)}
+                >
+                  <i className="bi bi-download" /> Descargar boleta
+                </button>
+              </>
+            ) : (
+              <div className="detalle-aviso">
+                <span>Aún no se ha emitido boleta (se emite al aprobarse el pago)</span>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
     </>
