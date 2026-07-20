@@ -49,6 +49,15 @@ public class DataSeeder implements CommandLineRunner {
     // ya tiene datos (count() == 0) para no duplicar informacion en reinicios sucesivos.
     @Override
     public void run(String... args) {
+        // ===== MIGRACION DE ROLES =====
+        // Se elimino el rol USUARIO (ver enum Rol): toda fila que lo tenga pasa a ADMIN.
+        // Va PRIMERO que todo, porque cualquier consulta que cargue usuarios con el rol viejo
+        // fallaria al convertir el texto 'USUARIO' a un enum que ya no tiene esa constante.
+        // Se hace aca (y no con un SQL a mano) para que el arreglo viaje con el codigo y
+        // funcione en cualquier PC. Es idempotente: si no hay filas viejas, no hace nada.
+        int migrados = usuarioRepo.migrarRolesAAdmin(Rol.ADMIN);
+        if (migrados > 0) log.info("Migracion: {} usuario(s) con rol viejo pasaron a ADMIN", migrados);
+
         Map<String, Categoria> cats = new HashMap<>();
 
         // ===== CATEGORIAS =====

@@ -11,10 +11,12 @@ import TableToolbar from '../../components/ui/TableToolbar.jsx'
 import TableSkeleton from '../../components/ui/TableSkeleton.jsx'
 import Pagination from '../../components/ui/Pagination.jsx'
 
+// Ya no se elige rol: todos los usuarios son ADMIN. La tienda pública no necesita login
+// (se compra sin cuenta), así que un rol "USUARIO" que igual entraba a todo el panel no
+// aportaba nada y solo daba una falsa sensación de permisos limitados.
 const EMPTY = { username: '', email: '', nombre: '', password: '', telefono: '', rol: 'ADMIN' }
-const ROLES = ['ADMIN', 'USUARIO']
 
-// Página admin: CRUD de usuarios del sistema (accesos al panel, con roles ADMIN/USUARIO)
+// Página admin: CRUD de usuarios del sistema (accesos al panel, todos con rol ADMIN)
 export default function AdminUsuarios() {
   const toast = useToast()
   const confirm = useConfirm()
@@ -62,7 +64,8 @@ export default function AdminUsuarios() {
   // Abre el modal en modo "editar": precarga el formulario (la contraseña se deja vacía)
   const abrirEditar = (u) => {
     setEditing(u)
-    setForm({ username: u.username, email: u.email, nombre: u.nombre, password: '', telefono: u.telefono || '', rol: u.rol })
+    // El rol siempre viaja como ADMIN: el backend lo fuerza igual, aquí solo somos coherentes.
+    setForm({ username: u.username, email: u.email, nombre: u.nombre, password: '', telefono: u.telefono || '', rol: 'ADMIN' })
     setFormError('')
     setShowModal(true)
   }
@@ -158,7 +161,8 @@ export default function AdminUsuarios() {
                     <td>{u.nombre}</td>
                     <td>{u.email}</td>
                     <td>
-                      <span className={'badge ' + (u.rol === 'ADMIN' ? 'badge-accent' : 'badge-cat')}>{u.rol}</span>
+                      {/* Badge fijo: todo usuario del sistema es administrador */}
+                      <span className="badge badge-accent">ADMIN</span>
                     </td>
                     <td>
                       <div className="cell-actions">
@@ -219,10 +223,11 @@ export default function AdminUsuarios() {
                 <input className="input" value={form.telefono} onChange={cambiar('telefono')} />
               </div>
               <div className="field">
-                <label className="label">Rol *</label>
-                <select className="select" value={form.rol} onChange={cambiar('rol')} required>
-                  {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-                </select>
+                {/* Sin selector de rol: todos los usuarios del panel son administradores */}
+                <label className="label">Rol</label>
+                <div style={{ paddingTop: '0.35rem' }}>
+                  <span className="badge badge-accent">ADMIN</span>
+                </div>
               </div>
               <div className="field full">
                 <label className="label">{editing ? 'Contraseña (dejar vacío para no cambiar)' : 'Contraseña *'}</label>

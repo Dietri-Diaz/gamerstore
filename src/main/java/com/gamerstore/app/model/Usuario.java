@@ -32,7 +32,7 @@ public class Usuario {
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
 
-    // Rol del usuario (USUARIO/ADMIN), guardado como texto en la BD
+    // Rol del usuario, guardado como texto en la BD. Hoy solo existe ADMIN (ver enum Rol)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Rol rol = Rol.ADMIN;

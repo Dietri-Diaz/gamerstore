@@ -57,13 +57,11 @@ public class UsuarioService {
         return repo.count();
     }
 
-    // Convierte el texto de rol al enum Rol; si no es un valor válido, responde 400.
+    // Convierte el texto de rol al enum Rol. Como ya solo existe ADMIN (se eliminó el rol
+    // USUARIO), ignoramos a propósito lo que mande el cliente y devolvemos siempre ADMIN:
+    // así un request viejo con "rol":"USUARIO" no rompe, simplemente se normaliza.
     private Rol parseRol(String rol) {
-        try {
-            return Rol.valueOf(rol.trim().toUpperCase());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol inválido");
-        }
+        return Rol.ADMIN;
     }
 
     /** Crea un usuario validando contraseña obligatoria y que username/email no estén ya registrados; guarda la contraseña encriptada. */
