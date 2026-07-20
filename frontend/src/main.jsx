@@ -6,6 +6,7 @@ import { ConfigProvider } from './config/ConfigContext.jsx'
 import { AuthProvider } from './auth/AuthContext.jsx'
 import { ToastProvider } from './components/ui/Toast.jsx'
 import { ConfirmProvider } from './components/ui/Confirm.jsx'
+import { CarritoProvider } from './carrito/CarritoContext.jsx'
 import './index.css'
 
 // Punto de entrada de la app: monta <App /> dentro de una cadena de providers.
@@ -24,7 +25,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <ToastProvider>
             {/* Dialogos de confirmacion (ej. "seguro que deseas eliminar?") */}
             <ConfirmProvider>
-              <App />
+              {/* Carrito de compras de la tienda publica, persistido en localStorage */}
+              <CarritoProvider>
+                <App />
+              </CarritoProvider>
             </ConfirmProvider>
           </ToastProvider>
         </AuthProvider>

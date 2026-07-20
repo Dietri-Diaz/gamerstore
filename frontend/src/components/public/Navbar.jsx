@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext.jsx'
+import { useCarrito } from '../../carrito/CarritoContext.jsx'
 
 // Barra de navegación pública: logo, buscador, enlaces del sitio y acceso al panel
 // admin (o botón de salir si ya hay una sesión iniciada).
 export default function Navbar() {
   const { user, logout } = useAuth()
+  const { cantidadTotal } = useCarrito()
   const navigate = useNavigate()
   const [q, setQ] = useState('') // texto del buscador
   const [open, setOpen] = useState(false) // menú móvil abierto/cerrado
@@ -51,6 +53,14 @@ export default function Navbar() {
           </NavLink>
           <NavLink to="/contacto" className="nav-link" onClick={close}>
             Contacto
+          </NavLink>
+          <NavLink to="/carrito" className="nav-link nav-cart" onClick={close}>
+            <span className="nav-cart-icon">
+              <i className="bi bi-cart3" />
+              {/* Badge con la cantidad de items, solo visible si hay algo en el carrito */}
+              {cantidadTotal > 0 && <span className="cart-badge">{cantidadTotal}</span>}
+            </span>
+            Carrito
           </NavLink>
 
           {/* Si hay sesión iniciada: link al panel y botón de salir. Si no: link al login admin */}
