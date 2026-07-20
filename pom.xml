@@ -84,11 +84,34 @@
             <artifactId>openpdf</artifactId>
             <version>1.3.35</version>
         </dependency>
+        <!-- Plantillas HTML para los PDF (boleta) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <!-- Renderiza HTML+CSS a PDF -->
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>1.0.10</version>
+        </dependency>
         <!-- Utilidades de test para seguridad (@WithMockUser) -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- Pasarela de pagos real (modo prueba): SDK oficial de Stripe -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>29.2.0</version>
+        </dependency>
+        <!-- Código QR de la boleta de venta (OpenPDF 1.3.35 no trae BarcodeQRCode) -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
         </dependency>
     </dependencies>
     <build>

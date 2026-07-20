@@ -30,3 +30,6 @@ Thumbs.db
 
 # Dependencias del frontend
 node_modules/
+
+# Claves privadas (Stripe, apiperu) - nunca subir al repositorio
+src/main/resources/application-local.properties

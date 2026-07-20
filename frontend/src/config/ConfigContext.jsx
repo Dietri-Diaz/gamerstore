@@ -2,7 +2,13 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { PublicAPI } from '../api/endpoints'
 
 // Valores de respaldo mientras se carga (o si falla) la config real del backend
-const DEFAULTS = { tiendaNombre: 'GamerStore', whatsappNumero: '51986969024' }
+const DEFAULTS = {
+  tiendaNombre: 'GamerStore',
+  whatsappNumero: '51986969024',
+  yapeMontoMaximo: 500,
+  stripeEnabled: false,
+  stripePublicKey: '',
+}
 
 // Contexto con los datos generales de la tienda (nombre, whatsapp, etc.)
 const ConfigContext = createContext(DEFAULTS)

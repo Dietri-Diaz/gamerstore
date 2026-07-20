@@ -1,0 +1,20 @@
+# ============================================================================
+#  PLANTILLA DE CLAVES PRIVADAS
+# ============================================================================
+# 1. Copia este archivo y renombra la copia a:  application-local.properties
+# 2. Reemplaza los valores de ejemplo por tus propias claves.
+#
+# El archivo application-local.properties está en .gitignore, así que tus
+# claves NUNCA se suben al repositorio (GitHub bloquea los push con secretos).
+#
+# Si no pones claves, el sistema igual funciona:
+#   - Sin token de apiperu -> no autocompleta el DNI (el resto va normal).
+#   - Sin claves de Stripe -> la pasarela usa el modo simulado (Luhn).
+# ============================================================================
+
+# Token de apiperu.dev para consultar DNI en RENIEC -> https://apiperu.dev
+app.apidevperu.token=TU_TOKEN_DE_APIPERU
+
+# Claves de Stripe en modo PRUEBA -> https://dashboard.stripe.com/test/apikeys
+app.stripe.public-key=pk_test_TU_CLAVE_PUBLICA
+app.stripe.secret-key=sk_test_TU_CLAVE_SECRETA

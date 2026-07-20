@@ -1,0 +1,1 @@
+Coloca aquí tu QR de Yape exportado desde la app, con el nombre exacto: yape-qr.png

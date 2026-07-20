@@ -50,6 +50,13 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/images/productos/**")
                 .addResourceLocations(uploadsLocation);
 
+        // QR de Yape para la pasarela de pagos (carpeta física uploads/qr/).
+        Path qrDir = Paths.get("uploads/qr").toAbsolutePath().normalize();
+        String qrLocation = qrDir.toUri().toString();
+        if (!qrLocation.endsWith("/")) qrLocation += "/";
+        registry.addResourceHandler("/images/qr/**")
+                .addResourceLocations(qrLocation);
+
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
                 .resourceChain(true)
