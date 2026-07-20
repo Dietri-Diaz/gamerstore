@@ -6,6 +6,8 @@ import Home from './pages/public/Home.jsx'
 import Catalogo from './pages/public/Catalogo.jsx'
 import ProductoDetalle from './pages/public/ProductoDetalle.jsx'
 import Contacto from './pages/public/Contacto.jsx'
+import Carrito from './pages/public/Carrito.jsx'
+import Checkout from './pages/public/Checkout.jsx'
 
 // Panel de administracion: requiere estar logueado (ver ProtectedRoute)
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
@@ -16,6 +18,8 @@ import AdminProductos from './pages/admin/AdminProductos.jsx'
 import AdminCategorias from './pages/admin/AdminCategorias.jsx'
 import AdminClientes from './pages/admin/AdminClientes.jsx'
 import AdminPedidos from './pages/admin/AdminPedidos.jsx'
+import AdminPagos from './pages/admin/AdminPagos.jsx'
+import AdminVentas from './pages/admin/AdminVentas.jsx'
 import AdminUsuarios from './pages/admin/AdminUsuarios.jsx'
 
 // Define todas las rutas de la app: zona publica (catalogo, home, contacto),
@@ -31,6 +35,8 @@ export default function App() {
         <Route path="/productos" element={<Catalogo />} />
         <Route path="/productos/:id" element={<ProductoDetalle />} />
         <Route path="/contacto" element={<Contacto />} />
+        <Route path="/carrito" element={<Carrito />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Route>
 
       {/* Login admin (sin layout) */}
@@ -45,6 +51,9 @@ export default function App() {
           <Route path="/admin/categorias" element={<AdminCategorias />} />
           <Route path="/admin/clientes" element={<AdminClientes />} />
           <Route path="/admin/pedidos" element={<AdminPedidos />} />
+          {/* Pagos ya no está en el menú: el pago se ve dentro del detalle del pedido. La ruta queda para auditoría. */}
+          <Route path="/admin/pagos" element={<AdminPagos />} />
+          <Route path="/admin/ventas" element={<AdminVentas />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
         </Route>
       </Route>
