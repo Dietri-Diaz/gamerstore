@@ -25,7 +25,11 @@ public class PedidoMapper {
                 p.getTotal(),
                 p.getMetodoPago(),
                 p.getCantidadTotal(),
-                items
+                items,
+                p.getTipoEntrega(),
+                p.getDireccionEnvio(),
+                p.getReferenciaEnvio(),
+                p.getMotivoAnulacion()
         );
     }
 

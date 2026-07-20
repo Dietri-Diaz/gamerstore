@@ -15,4 +15,12 @@ public record PedidoRequest(
 
         @NotEmpty(message = "El pedido debe tener al menos un producto")
         @Valid
-        List<PedidoItemRequest> items) {}
+        List<PedidoItemRequest> items,
+
+        // Entrega OPCIONAL en el alta desde el panel: a diferencia del checkout público (donde
+        // el bloque "entrega" es obligatorio), aquí el admin puede cargar una venta de mostrador
+        // sin especificar nada y el pedido queda como RECOJO_TIENDA (ver Pedido.@PrePersist).
+        // Si igual manda DELIVERY, la dirección se le exige en el service, como al comprador.
+        String tipoEntrega,
+        String direccionEnvio,
+        String referenciaEnvio) {}

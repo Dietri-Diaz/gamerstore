@@ -5,8 +5,10 @@ import jakarta.validation.constraints.*;
 
 import java.util.List;
 
-/** Pedido completo que envía la tienda pública: comprador + carrito + pago. */
+/** Pedido completo que envía la tienda pública: comprador + carrito + entrega + pago. */
 public record CheckoutRequest(
         @NotNull @Valid CheckoutClienteDTO cliente,
         @NotEmpty(message = "El carrito está vacío") @Valid List<PedidoItemRequest> items,
+        // Bloque obligatorio: toda compra de la tienda dice si se recoge o se envía.
+        @NotNull(message = "Elige cómo quieres recibir tu pedido") @Valid CheckoutEntregaDTO entrega,
         @NotNull @Valid CheckoutPagoDTO pago) {}

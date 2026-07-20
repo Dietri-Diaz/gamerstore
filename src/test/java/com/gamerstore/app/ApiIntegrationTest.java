@@ -84,14 +84,20 @@ class ApiIntegrationTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void crearPedidoValido() throws Exception {
-        // cliente 1 y producto 1 vienen del DataSeeder
+        // cliente 1 y producto 1 vienen del DataSeeder.
+        // Se manda un DELIVERY con su direccion, que es el caso completo del alta de pedido.
         mvc.perform(post("/api/admin/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"clienteId\":1,\"metodoPago\":\"TARJETA\"," +
-                                "\"items\":[{\"productoId\":1,\"cantidad\":2}]}"))
+                                "\"items\":[{\"productoId\":1,\"cantidad\":2}]," +
+                                "\"tipoEntrega\":\"DELIVERY\"," +
+                                "\"direccionEnvio\":\"Av. Siempre Viva 742, Ate\"," +
+                                "\"referenciaEnvio\":\"Porton azul\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"))
-                .andExpect(jsonPath("$.total").value(greaterThan(0.0)));
+                .andExpect(jsonPath("$.total").value(greaterThan(0.0)))
+                .andExpect(jsonPath("$.tipoEntrega").value("DELIVERY"))
+                .andExpect(jsonPath("$.direccionEnvio").value("Av. Siempre Viva 742, Ate"));
     }
 
     @Test

@@ -71,9 +71,16 @@ public class PedidoService {
         }).toList();
     }
 
-    /** Registra un pedido: arma sus lineas, valida y descuenta stock, calcula el total y lo guarda (cascade). */
+    /**
+     * Registra un pedido: valida los datos de entrega, arma sus lineas, valida y descuenta
+     * stock, calcula el total y lo guarda (cascade).
+     *
+     * tipoEntrega/direccionEnvio/referenciaEnvio pueden venir en null (venta de mostrador
+     * cargada desde el panel): en ese caso el pedido queda como RECOJO_TIENDA.
+     */
     @Transactional
-    public Pedido crear(Long clienteId, String metodoPago, List<PedidoItemRequest> items) {
+    public Pedido crear(Long clienteId, String metodoPago, List<PedidoItemRequest> items,
+                        String tipoEntrega, String direccionEnvio, String referenciaEnvio) {
         // Solo TARJETA o YAPE: EFECTIVO/PLIN/TRANSFERENCIA eran del sistema anterior
         // (venta cotizada por WhatsApp, sin pago ni boleta) y ya no aplican.
         if (metodoPago != null && !metodoPago.isBlank()
@@ -89,6 +96,7 @@ public class PedidoService {
         pedido.setCliente(cliente);
         pedido.setMetodoPago(metodoPago);
         pedido.setEstado("PENDIENTE");
+        aplicarEntrega(pedido, tipoEntrega, direccionEnvio, referenciaEnvio);
 
         double total = 0;
         for (PedidoItemRequest it : items) {
@@ -111,6 +119,43 @@ public class PedidoService {
         }
         pedido.setTotal(total);
         return pedidoRepo.save(pedido);
+    }
+
+    /**
+     * Valida y copia al pedido los datos de entrega.
+     *
+     * Esta validacion vive en el SERVIDOR a proposito: el front oculta el campo de direccion
+     * cuando el comprador elige recojo en tienda, pero cualquiera puede mandar el JSON a mano,
+     * asi que la regla "delivery exige direccion" se comprueba igual aca.
+     */
+    private void aplicarEntrega(Pedido pedido, String tipoEntrega, String direccion, String referencia) {
+        // Sin dato -> recojo en tienda (es la opcion que no necesita direccion).
+        String tipo = (tipoEntrega == null || tipoEntrega.isBlank())
+                ? "RECOJO_TIENDA"
+                : tipoEntrega.trim().toUpperCase();
+
+        if (!tipo.equals("RECOJO_TIENDA") && !tipo.equals("DELIVERY")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de entrega inválido");
+        }
+
+        if (tipo.equals("DELIVERY")) {
+            // Pedimos un minimo de 10 caracteres: una direccion util para repartir no cabe
+            // en menos (calle + numero + distrito). Evita el clasico "asd" para pasar el campo.
+            String dir = direccion == null ? "" : direccion.trim();
+            if (dir.length() < 10) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "La dirección de envío es obligatoria para delivery");
+            }
+            pedido.setDireccionEnvio(dir);
+            pedido.setReferenciaEnvio((referencia == null || referencia.isBlank()) ? null : referencia.trim());
+        } else {
+            // Recojo en tienda: la direccion y la referencia no aplican, se guardan en null
+            // aunque el front las haya mandado (asi no queda un dato de envio que confunda).
+            pedido.setDireccionEnvio(null);
+            pedido.setReferenciaEnvio(null);
+        }
+
+        pedido.setTipoEntrega(tipo);
     }
 
     /** Edita un pedido: cambia su estado y, opcionalmente, el metodo de pago. */

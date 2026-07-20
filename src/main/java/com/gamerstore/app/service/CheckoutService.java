@@ -42,7 +42,10 @@ public class CheckoutService {
     public CheckoutResponse comprar(CheckoutRequest req) {
         Cliente cliente = obtenerOCrearCliente(req.cliente());
 
-        Pedido pedido = pedidoService.crear(cliente.getId(), req.pago().metodo(), req.items());
+        // Los datos de entrega (recojo o delivery + dirección) viajan hasta el pedido; el
+        // service valida que un DELIVERY traiga dirección de verdad.
+        Pedido pedido = pedidoService.crear(cliente.getId(), req.pago().metodo(), req.items(),
+                req.entrega().tipo(), req.entrega().direccion(), req.entrega().referencia());
 
         Pago pago = cobrar(pedido.getId(), req.pago());
 

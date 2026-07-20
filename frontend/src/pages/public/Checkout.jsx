@@ -58,7 +58,12 @@ function detectarMarca(numeroLimpio) {
 
 const EMPTY_CLIENTE = { dni: '', nombres: '', apellidos: '', telefono: '', email: '', direccion: '' }
 const EMPTY_TARJETA = { numero: '', titular: '', vencimiento: '', cvv: '' }
-const PASOS_LABEL = ['Identificación', 'Datos', 'Pago', 'Confirmar']
+const PASOS_LABEL = ['Identificación', 'Datos', 'Entrega', 'Pago', 'Confirmar']
+
+// Direccion fisica de la tienda para el recojo (la misma que se muestra en Contacto.jsx)
+const DIRECCION_TIENDA = 'Lima, Perú — atención presencial con cita previa'
+// Largo minimo de la direccion de envio. El backend valida lo mismo (no confiamos solo en el front).
+const MIN_DIRECCION = 10
 
 // Subcomponente que SOLO existe dentro de <Elements> (los hooks useStripe/useElements
 // exigen ese contexto). Muestra el input de Titular + el CardElement de Stripe y, cada
@@ -161,14 +166,19 @@ export default function Checkout() {
   const [cliente, setCliente] = useState(EMPTY_CLIENTE)
   const [buscandoDni, setBuscandoDni] = useState(false)
 
-  // --- Paso 3: método de pago ---
+  // --- Paso 3: tipo de entrega (recojo en tienda o delivery a domicilio) ---
+  const [tipoEntrega, setTipoEntrega] = useState(null) // 'RECOJO_TIENDA' | 'DELIVERY'
+  const [direccionEnvio, setDireccionEnvio] = useState('')
+  const [referenciaEnvio, setReferenciaEnvio] = useState('')
+
+  // --- Paso 4: método de pago ---
   const [metodo, setMetodo] = useState(null) // 'yape' | 'tarjeta'
   const [numeroOperacion, setNumeroOperacion] = useState('')
   const [tarjeta, setTarjeta] = useState(EMPTY_TARJETA)
   const [qrError, setQrError] = useState(false)
   const [copiado, setCopiado] = useState(false)
 
-  // --- Paso 3 con Stripe: el PaymentMethod ya tokenizado (se crea al salir del paso 3) ---
+  // --- Paso 4 con Stripe: el PaymentMethod ya tokenizado (se crea al salir del paso 4) ---
   const [paymentMethodId, setPaymentMethodId] = useState(null)
   const [tarjetaResumen, setTarjetaResumen] = useState(null) // { marca, ult4 } para mostrar en el paso 4
   const [stripeCompleto, setStripeCompleto] = useState(false)
@@ -177,7 +187,7 @@ export default function Checkout() {
   // re-render por si solo; el estado "completo" si lo hace, para habilitar/deshabilitar el boton)
   const stripeInfoRef = useRef({ completo: false, tokenizar: null })
 
-  // --- Paso 4: revisar, pagar y confirmación final ---
+  // --- Paso 5: revisar, pagar y confirmación final ---
   const [procesando, setProcesando] = useState(false)
   const [pasoAnim, setPasoAnim] = useState(-1) // indice del paso de la animacion de progreso
   const [error, setError] = useState('')
@@ -197,6 +207,22 @@ export default function Checkout() {
   const marca = detectarMarca(numeroLimpio)
 
   const datosValidos = /^\d{8}$/.test(cliente.dni) && cliente.nombres.trim() !== '' && cliente.apellidos.trim() !== ''
+
+  // Para recoger en tienda no se pide nada; para delivery la direccion es obligatoria
+  // y con un minimo de caracteres (una direccion de 3 letras no sirve para repartir).
+  const entregaValida =
+    tipoEntrega === 'RECOJO_TIENDA' ||
+    (tipoEntrega === 'DELIVERY' && direccionEnvio.trim().length >= MIN_DIRECCION)
+
+  // Al elegir delivery, si el cliente ya tenia una direccion registrada la proponemos
+  // como direccion de envio (la puede cambiar); asi no la escribe dos veces.
+  const elegirEntrega = (tipo) => {
+    setTipoEntrega(tipo)
+    if (tipo === 'DELIVERY' && direccionEnvio.trim() === '' && cliente.direccion.trim() !== '') {
+      setDireccionEnvio(cliente.direccion)
+    }
+  }
+
   const pagoValido =
     metodo === 'tarjeta'
       ? tarjetaValida && tarjeta.titular.trim() !== '' && tarjeta.vencimiento.length === 5 && tarjeta.cvv.length >= 3
@@ -284,8 +310,8 @@ export default function Checkout() {
     setStripeCompleto(completo)
   }, [])
 
-  // Boton "Continuar" del paso 3 cuando el metodo es tarjeta con Stripe activo: tokeniza
-  // la tarjeta AHORA (mientras el CardElement todavia existe) porque en el paso 4 ya no
+  // Boton "Continuar" del paso 4 cuando el metodo es tarjeta con Stripe activo: tokeniza
+  // la tarjeta AHORA (mientras el CardElement todavia existe) porque en el paso 5 ya no
   // se renderiza el formulario y el elemento se perderia.
   const continuarConStripe = async () => {
     if (!stripeInfoRef.current.tokenizar) return
@@ -300,13 +326,13 @@ export default function Checkout() {
       }
       setPaymentMethodId(paymentMethod.id)
       setTarjetaResumen({ marca: paymentMethod.card.brand.toUpperCase(), ult4: paymentMethod.card.last4 })
-      setStep(4)
+      setStep(5)
     } finally {
       setTokenizando(false)
     }
   }
 
-  // Paso 4: arma el body EXACTO del contrato de POST /api/checkout, dispara el pago real
+  // Paso 5: arma el body EXACTO del contrato de POST /api/checkout, dispara el pago real
   // y en paralelo anima 3 pasos de progreso para que la espera se sienta creible.
   const pagar = async () => {
     setProcesando(true)
@@ -323,6 +349,13 @@ export default function Checkout() {
         direccion: cliente.direccion,
       },
       items: items.map((i) => ({ productoId: i.id, cantidad: i.cantidad })),
+      // Tipo de entrega elegido en el paso 3. En recojo en tienda no se manda direccion
+      // (el backend la guarda como null): el pedido se recoge en el local.
+      entrega: {
+        tipo: tipoEntrega,
+        direccion: tipoEntrega === 'DELIVERY' ? direccionEnvio.trim() : null,
+        referencia: tipoEntrega === 'DELIVERY' ? referenciaEnvio.trim() || null : null,
+      },
       pago:
         metodo === 'tarjeta'
           ? stripeEnabled && paymentMethodId
@@ -375,7 +408,7 @@ export default function Checkout() {
         setPaymentMethodId(null)
         setTarjetaResumen(null)
       }
-      setStep(3)
+      setStep(4)
     } finally {
       setProcesando(false)
       setPasoAnim(-1)
@@ -392,6 +425,12 @@ export default function Checkout() {
           <p className="text-muted">Guarda el código de tu pedido, te servirá para hacerle seguimiento.</p>
 
           <div className="compra-ok-codigo">{confirmacion.pedidoCodigo}</div>
+
+          {/* La promesa de arriba se cumple aqui: enlace directo a la pagina de seguimiento.
+              Solo hace falta este codigo + el DNI con el que se compro. */}
+          <Link to="/seguimiento" className="btn btn-outline btn-sm">
+            <i className="bi bi-truck" /> Seguir mi pedido
+          </Link>
 
           <div className="compra-ok-datos">
             <div>
@@ -645,13 +684,16 @@ export default function Checkout() {
                   />
                 </div>
                 <div className="field full">
-                  <label className="label">Dirección de entrega</label>
+                  {/* Direccion del cliente (su domicilio registrado). La direccion a la que
+                      se envia el pedido se elige aparte, en el paso de Entrega. */}
+                  <label className="label">Dirección</label>
                   <input
                     className="input"
                     value={cliente.direccion}
                     onChange={(e) => setCliente((c) => ({ ...c, direccion: e.target.value }))}
                     placeholder="Av. Ejemplo 123, Lima"
                   />
+                  <small className="text-muted">La dirección de envío la eliges en el siguiente paso.</small>
                 </div>
               </div>
 
@@ -666,8 +708,92 @@ export default function Checkout() {
             </div>
           )}
 
-          {/* ============ PASO 3: MÉTODO DE PAGO ============ */}
+          {/* ============ PASO 3: TIPO DE ENTREGA ============ */}
           {step === 3 && (
+            <div className="panel">
+              <div className="panel-head">
+                <h5>
+                  <i className="bi bi-box-seam" style={{ color: 'var(--accent)' }} /> ¿Cómo quieres recibirlo?
+                </h5>
+              </div>
+
+              <div className="opcion-cards">
+                <button
+                  type="button"
+                  className={'opcion-card' + (tipoEntrega === 'RECOJO_TIENDA' ? ' sel' : '')}
+                  onClick={() => elegirEntrega('RECOJO_TIENDA')}
+                >
+                  <i className="bi bi-shop" />
+                  <strong>🏪 Recojo en tienda</strong>
+                  <span className="text-muted">Sin costo de envío. Lo recoges tú mismo.</span>
+                </button>
+                <button
+                  type="button"
+                  className={'opcion-card' + (tipoEntrega === 'DELIVERY' ? ' sel' : '')}
+                  onClick={() => elegirEntrega('DELIVERY')}
+                >
+                  <i className="bi bi-truck" />
+                  <strong>🚚 Delivery a domicilio</strong>
+                  <span className="text-muted">Te lo llevamos a la dirección que nos indiques.</span>
+                </button>
+              </div>
+
+              {/* Recojo: no se pide nada, solo se le dice dónde tiene que ir */}
+              {tipoEntrega === 'RECOJO_TIENDA' && (
+                <div className="entrega-tienda">
+                  <i className="bi bi-geo-alt-fill" />
+                  <div>
+                    <strong>Recoges en:</strong>
+                    <span>{DIRECCION_TIENDA}</span>
+                    <small className="text-muted">Trae tu DNI y el código de pedido que te daremos al pagar.</small>
+                  </div>
+                </div>
+              )}
+
+              {/* Delivery: dirección obligatoria (el backend valida lo mismo) + referencia opcional */}
+              {tipoEntrega === 'DELIVERY' && (
+                <div className="entrega-campos">
+                  <div className="field">
+                    <label className="label">Dirección de envío *</label>
+                    <input
+                      className={'input' + (direccionEnvio !== '' && !entregaValida ? ' input-error' : '')}
+                      value={direccionEnvio}
+                      onChange={(e) => setDireccionEnvio(e.target.value.slice(0, 200))}
+                      maxLength={200}
+                      placeholder="Av. Siempre Viva 742, Ate"
+                    />
+                    {direccionEnvio !== '' && !entregaValida && (
+                      <small className="campo-error">
+                        <i className="bi bi-exclamation-triangle-fill" /> Escribe la dirección completa (mínimo {MIN_DIRECCION} caracteres)
+                      </small>
+                    )}
+                  </div>
+                  <div className="field">
+                    <label className="label">Referencia (opcional)</label>
+                    <input
+                      className="input"
+                      value={referenciaEnvio}
+                      onChange={(e) => setReferenciaEnvio(e.target.value.slice(0, 150))}
+                      maxLength={150}
+                      placeholder="Portón azul, frente al parque"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="wizard-nav">
+                <button type="button" className="btn btn-outline" onClick={() => setStep(2)}>
+                  <i className="bi bi-arrow-left" /> Atrás
+                </button>
+                <button type="button" className="btn btn-primary" disabled={!entregaValida} onClick={() => setStep(4)}>
+                  Continuar <i className="bi bi-arrow-right" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ============ PASO 4: MÉTODO DE PAGO ============ */}
+          {step === 4 && (
             <div className="panel">
               <div className="panel-head">
                 <h5>
@@ -842,7 +968,7 @@ export default function Checkout() {
               )}
 
               <div className="wizard-nav">
-                <button type="button" className="btn btn-outline" onClick={() => setStep(2)}>
+                <button type="button" className="btn btn-outline" onClick={() => setStep(3)}>
                   <i className="bi bi-arrow-left" /> Atrás
                 </button>
                 {metodo === 'tarjeta' && stripeEnabled ? (
@@ -855,7 +981,7 @@ export default function Checkout() {
                     {tokenizando ? 'Verificando...' : 'Continuar'} <i className="bi bi-arrow-right" />
                   </button>
                 ) : (
-                  <button type="button" className="btn btn-primary" disabled={!pagoValido} onClick={() => setStep(4)}>
+                  <button type="button" className="btn btn-primary" disabled={!pagoValido} onClick={() => setStep(5)}>
                     Continuar <i className="bi bi-arrow-right" />
                   </button>
                 )}
@@ -863,8 +989,8 @@ export default function Checkout() {
             </div>
           )}
 
-          {/* ============ PASO 4: REVISAR Y PAGAR ============ */}
-          {step === 4 && (
+          {/* ============ PASO 5: REVISAR Y PAGAR ============ */}
+          {step === 5 && (
             <div className="panel">
               <div className="panel-head">
                 <h5>
@@ -902,6 +1028,29 @@ export default function Checkout() {
                     </div>
                   </div>
 
+                  {/* Tipo de entrega elegido en el paso 3: con recojo no hay direccion que mostrar */}
+                  <div className="revision-bloque">
+                    <h6>Entrega</h6>
+                    {tipoEntrega === 'DELIVERY' ? (
+                      <div className="revision-datos">
+                        <div className="full">
+                          <small>Delivery a domicilio</small>
+                          <strong>{direccionEnvio}</strong>
+                        </div>
+                        {referenciaEnvio.trim() !== '' && (
+                          <div className="full">
+                            <small>Referencia</small>
+                            <strong>{referenciaEnvio}</strong>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="revision-metodo">
+                        <i className="bi bi-shop" /> Recojo en tienda · {DIRECCION_TIENDA}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="revision-bloque">
                     <h6>Método de pago</h6>
                     {metodo === 'yape' ? (
@@ -923,7 +1072,7 @@ export default function Checkout() {
                   </div>
 
                   <div className="wizard-nav">
-                    <button type="button" className="btn btn-outline" onClick={() => setStep(3)}>
+                    <button type="button" className="btn btn-outline" onClick={() => setStep(4)}>
                       <i className="bi bi-arrow-left" /> Atrás
                     </button>
                   </div>
@@ -979,7 +1128,7 @@ export default function Checkout() {
           {!procesando && (
             <p className="text-muted" style={{ fontSize: '0.82rem' }}>
               {/* Recordatorio de en que paso esta el comprador, sin repetir el stepper */}
-              Paso {step} de 4 — completa los pasos para confirmar tu compra.
+              Paso {step} de {PASOS_LABEL.length} — completa los pasos para confirmar tu compra.
             </p>
           )}
         </div>
