@@ -122,4 +122,20 @@ public class UsuarioService {
         }
         repo.deleteById(id);
     }
+
+    /** ¿Ya existe un usuario con ese username? Si viene id, lo excluye (para validar en vivo al editar). */
+    public boolean existeUsername(String username, Long id) {
+        if (username == null || username.isBlank()) return false;
+        return id == null
+                ? repo.existsByUsername(username.trim())
+                : repo.existsByUsernameAndIdNot(username.trim(), id);
+    }
+
+    /** ¿Ya existe un usuario con ese email? Si viene id, lo excluye (para validar en vivo al editar). */
+    public boolean existeEmail(String email, Long id) {
+        if (email == null || email.isBlank()) return false;
+        return id == null
+                ? repo.existsByEmail(email.trim())
+                : repo.existsByEmailAndIdNot(email.trim(), id);
+    }
 }

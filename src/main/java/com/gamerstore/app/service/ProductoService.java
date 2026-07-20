@@ -103,4 +103,12 @@ public class ProductoService {
     public void eliminar(Long id) {
         productoRepo.deleteById(id);
     }
+
+    /** ¿Ya existe un producto con ese nombre? Si viene id, lo excluye (para validar en vivo al editar). */
+    public boolean existeNombre(String nombre, Long id) {
+        if (nombre == null || nombre.isBlank()) return false;
+        return id == null
+                ? productoRepo.existsByNombreIgnoreCase(nombre.trim())
+                : productoRepo.existsByNombreIgnoreCaseAndIdNot(nombre.trim(), id);
+    }
 }

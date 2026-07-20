@@ -72,4 +72,12 @@ public class CategoriaService {
         }
         repo.deleteById(id);
     }
+
+    /** ¿Ya existe una categoría con ese nombre? Si viene id, lo excluye (para validar en vivo al editar). */
+    public boolean existeNombre(String nombre, Long id) {
+        if (nombre == null || nombre.isBlank()) return false;
+        return id == null
+                ? repo.existsByNombreIgnoreCase(nombre.trim())
+                : repo.existsByNombreIgnoreCaseAndIdNot(nombre.trim(), id);
+    }
 }

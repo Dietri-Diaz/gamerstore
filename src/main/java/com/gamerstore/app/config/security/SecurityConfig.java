@@ -51,13 +51,18 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // Sin sesiones HTTP: cada request se autentica desde cero con el JWT (ver filtro).
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Reglas de acceso evaluadas en orden: login/refresh y catalogo (GET) son
-            // publicos, /api/admin/** solo para rol ADMIN, el resto de /api/** requiere
-            // estar autenticado, y cualquier otra ruta (la SPA de React) queda abierta.
+            // Reglas de acceso evaluadas en orden: login/refresh, catalogo (GET), el
+            // checkout publico (POST) y la consulta a RENIEC (GET) son publicos,
+            // /api/admin/** solo para rol ADMIN, el resto de /api/** requiere estar
+            // autenticado, y cualquier otra ruta (la SPA de React) queda abierta.
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**", "/api/config/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/checkout", "/api/checkout/**").permitAll()
+                // El comprador descarga su propia boleta sin loguearse (queda verificado con su DNI en el controller).
+                .requestMatchers(HttpMethod.GET, "/api/checkout/boleta/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/reniec/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()

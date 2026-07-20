@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GamerStore ERP — Guía completa para la exposición</title>
+<style>
+  @page { size: A4; margin: 12mm 13mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html,body { margin:0; padding:0; }
+  body { font-family:"Segoe UI",-apple-system,Roboto,Helvetica,Arial,sans-serif; color:#1e293b; font-size:10.3pt; line-height:1.55; background:#fff; }
+  code,.path,.k { font-family:"Consolas","Cascadia Code",monospace; }
+  .k { background:#eef2ff; color:#4338ca; border-radius:5px; padding:0 4px; font-size:8.6pt; }
+  .path { color:#0369a1; font-size:8.9pt; }
+  b { color:#0f172a; }
+  h1,h2,h3,h4 { margin:0; font-weight:800; }
+  p { margin:0 0 6px; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  /* Portada */
+  .cover { page-break-after: always; }
+  .cover-hero { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 55%,#0ea5e9 100%); color:#fff; border-radius:18px; padding:38px 32px; box-shadow:0 12px 34px rgba(79,70,229,.28); }
+  .cover-hero .badge { display:inline-block; background:rgba(255,255,255,.2); padding:6px 14px; border-radius:999px; font-size:9pt; font-weight:700; letter-spacing:.5px; }
+  .cover-hero h1 { font-size:36pt; line-height:1.03; margin:16px 0 6px; }
+  .cover-hero .sub { font-size:14pt; font-weight:600; opacity:.96; }
+  .cover-hero .meta { margin-top:16px; font-size:9.5pt; opacity:.92; }
+
+  .box { background:#f1f5f9; border:1px solid #e2e8f0; border-radius:14px; padding:16px 18px; margin-top:16px; break-inside:avoid; }
+  .box h3 { font-size:11.5pt; color:#334155; margin-bottom:8px; }
+  .flowline { font-family:"Consolas",monospace; font-size:8.4pt; color:#334155; white-space:pre; }
+  .tip { background:#fefce8; border:1px solid #fde68a; border-radius:12px; padding:12px 16px; font-size:9.5pt; margin-top:16px; color:#854d0e; }
+
+  table.reparto { width:100%; border-collapse:collapse; margin-top:18px; font-size:9.6pt; }
+  table.reparto th { background:#312e81; color:#fff; text-align:left; padding:9px 10px; }
+  table.reparto td { padding:8px 10px; border-bottom:1px solid #e2e8f0; vertical-align:top; }
+  table.reparto tr:nth-child(even) td { background:#f8fafc; }
+  .dot { display:inline-flex; width:22px; height:22px; border-radius:50%; color:#fff; font-weight:800; font-size:9pt; align-items:center; justify-content:center; }
+
+  /* Secciones grandes */
+  .sec { page-break-before: always; }
+  .sec-head { display:flex; align-items:center; gap:14px; padding:15px 18px; border-radius:14px; color:#fff; margin-bottom:12px; }
+  .sec-head .n { min-width:46px; height:46px; padding:0 10px; border-radius:12px; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; font-size:20pt; font-weight:800; }
+  .sec-head h2 { font-size:16.5pt; }
+  .sec-head .who { font-size:9pt; opacity:.92; font-weight:600; margin-top:3px; }
+  .resumen { font-size:10pt; color:#475569; font-style:italic; margin:0 2px 12px; padding-left:11px; border-left:3px solid #cbd5e1; }
+
+  .card { border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; margin-bottom:11px; break-inside:avoid; }
+  .card h4 { font-size:10.6pt; margin-bottom:8px; display:flex; align-items:center; gap:7px; }
+  .card h4 .ic { font-size:12pt; }
+
+  /* Flujo numerado */
+  ol.flow { margin:2px 0 0; padding-left:0; list-style:none; counter-reset:step; }
+  ol.flow li { position:relative; padding:4px 0 4px 30px; counter-increment:step; }
+  ol.flow li::before { content:counter(step); position:absolute; left:0; top:4px; width:20px; height:20px; border-radius:50%; color:#fff; font-size:8.5pt; font-weight:800; display:flex; align-items:center; justify-content:center; background:var(--c,#6366f1); }
+  .flow-title { font-weight:800; font-size:10.4pt; color:#0f172a; margin:10px 0 4px; }
+  .rule { background:#fef2f2; border-left:3px solid #f87171; padding:2px 8px; border-radius:4px; }
+
+  .ex { background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #3b82f6; border-radius:8px; padding:9px 13px; font-size:9.5pt; color:#1e3a8a; margin:8px 0; break-inside:avoid; }
+  .demo { background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 13px; font-size:9.6pt; color:#065f46; break-inside:avoid; margin-top:4px; }
+  ul.files { margin:0; padding-left:0; list-style:none; }
+  ul.files li { padding:3px 0 3px 16px; position:relative; }
+  ul.files li::before { content:"▸"; position:absolute; left:0; color:#94a3b8; }
+  .qa { break-inside:avoid; margin-bottom:8px; padding-left:12px; border-left:3px solid; }
+  .qa .q { font-weight:700; font-size:9.9pt; }
+  .qa .a { font-size:9.9pt; color:#334155; }
+
+  /* Tarjetas "qué usamos" */
+  .stack-grid { display:block; }
+  .stack { border:1px solid #e2e8f0; border-radius:12px; padding:11px 15px; margin-bottom:10px; break-inside:avoid; }
+  .stack h4 { font-size:11pt; color:#4338ca; margin-bottom:6px; display:flex; align-items:center; gap:7px; }
+  .stack ul { margin:0; padding-left:18px; }
+  .stack li { margin-bottom:3px; font-size:9.7pt; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ================= PORTADA ================= -->
+<section class="cover">
+  <div class="cover-hero">
+    <span class="badge">🖥️ MANUAL DEL PROYECTO · UTP</span>
+    <h1>GamerStore ERP</h1>
+    <div class="sub">Guía completa para la exposición — 6 partes + flujos explicados</div>
+    <div class="meta">Panel de administración de una tienda de tecnología · Spring Boot (API REST) + React (Vite) + MySQL · Seguridad con JWT<br>Incluye: cómo funciona cada módulo paso a paso, ejemplos reales y “qué usamos para qué”.</div>
+  </div>
+
+  <div class="box">
+    <h3>🧭 El viaje de CUALQUIER petición (memorícenlo — todo el ERP funciona así)</h3>
+    <div class="flowline">IDA:     Pantalla admin (React) ─▶ endpoints.js ─▶ client.js (+token) ─▶ Controller (/api) ─▶ Service (reglas) ─▶ Repository ─▶ Base de datos
+VUELTA:  Base de datos ─▶ Repository ─▶ Service ─▶ Mapper (Entidad→DTO) ─▶ Controller (JSON) ─▶ client.js ─▶ setState ─▶ la pantalla se actualiza</div>
+    <p style="font-size:9.4pt;margin-top:8px;margin-bottom:0;"><b>En palabras:</b> el usuario toca un botón → el front pide a una URL <span class="k">/api/...</span> con su token → el <b>Controller</b> recibe → el <b>Service</b> aplica las reglas → el <b>Repository</b> lee/graba en la <b>base de datos</b> → se arma un <b>DTO</b> (JSON) → el front actualiza la pantalla.</p>
+  </div>
+
+  <table class="reparto">
+    <thead><tr><th style="width:26px;">#</th><th>Parte (a exponer)</th><th>Responsable</th><th>De qué trata</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:#6366f1;">1</span></td><td><b>Arquitectura y modelo de datos</b></td><td>__________</td><td>Las capas del sistema y las entidades que se vuelven tablas</td></tr>
+      <tr><td><span class="dot" style="background:#f59e0b;">2</span></td><td><b>Datos reales + imágenes</b></td><td>__________</td><td>La carga inicial de datos y las imágenes guardadas en el proyecto</td></tr>
+      <tr><td><span class="dot" style="background:#e11d48;">3</span></td><td><b>Seguridad: login JWT + sesión</b></td><td>__________</td><td>Login con token, protección del panel, refresco y contador</td></tr>
+      <tr><td><span class="dot" style="background:#0ea5e9;">4</span></td><td><b>Productos y Categorías</b></td><td>__________</td><td>ABM del catálogo con subida de imágenes</td></tr>
+      <tr><td><span class="dot" style="background:#8b5cf6;">5</span></td><td><b>Clientes (RENIEC), Pedidos, PDF</b></td><td>__________</td><td>DNI real, registrar ventas y descargar el reporte</td></tr>
+      <tr><td><span class="dot" style="background:#14b8a6;">6</span></td><td><b>Dashboard, Usuarios, validaciones</b></td><td>__________</td><td>Estadísticas, gestión de usuarios y anti-duplicados</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip"><b>💡 Truco para las preguntas del profe:</b> todos los módulos siguen el MISMO viaje de arriba. Si te preguntan por algo que no es “tu parte”, explica ese viaje y di en qué archivo vive; con eso nadie se queda callado.</div>
+</section>
+
+<!-- ================= QUÉ USAMOS Y PARA QUÉ ================= -->
+<section class="sec">
+  <div class="sec-head" style="background:linear-gradient(135deg,#0f172a,#334155);"><div class="n">🧰</div><div><h2>¿Qué usamos y para qué? — chuleta por si pregunta el profe</h2><div class="who">“Para X usamos Y, que sirve para Z”</div></div></div>
+
+  <div class="stack"><h4>🔒 Seguridad</h4><ul>
+    <li><b>Autenticación:</b> usamos <b>Spring Security</b> + <b>JWT</b> (librería <b>jjwt</b>). Al iniciar sesión se emite un <b>token firmado</b> que el servidor verifica en cada petición, sin guardar sesión en memoria (stateless).</li>
+    <li><b>Contraseñas:</b> usamos <b>BCrypt</b> para <b>hashear</b> las claves; nunca se guardan en texto plano.</li>
+    <li><b>Sesión revocable:</b> usamos <b>refresh tokens guardados en la base de datos</b> (tabla <span class="k">refresh_token</span>) con <b>rotación</b>, para poder cerrar sesión de verdad (revocar) y renovar el acceso cada 5 min sin re-loguear.</li>
+    <li><b>Autorización:</b> usamos <b>roles</b> (ADMIN) y reglas por ruta en <b>SecurityConfig</b>; un <b>filtro</b> (JwtAuthenticationFilter) valida el token en cada request; <span class="k">/api/admin/**</span> exige rol ADMIN.</li>
+    <li><b>CORS:</b> configurado para permitir que el front (:5173) llame a la API (:8080).</li>
+  </ul></div>
+
+  <div class="stack"><h4>⚙️ Backend</h4><ul>
+    <li><b>Lenguaje:</b> <b>Java 17</b>. &nbsp; <b>Framework:</b> <b>Spring Boot 3.5.6</b>.</li>
+    <li><b>API REST:</b> <b>Spring Web</b> (<code>@RestController</code>) para exponer los endpoints <span class="k">/api/...</span>.</li>
+    <li><b>Acceso a datos (ORM):</b> <b>Spring Data JPA</b> con <b>Hibernate</b> — las clases <code>@Entity</code> se vuelven tablas y los <b>repositorios</b> generan las consultas por el nombre del método (sin escribir SQL).</li>
+    <li><b>Construcción y dependencias:</b> <b>Maven</b> (usando el wrapper <code>mvnw</code>).</li>
+    <li><b>Organización:</b> arquitectura por <b>capas</b> — Controller → Service → Repository, con <b>DTO</b> y <b>Mapper</b> para transportar los datos.</li>
+  </ul></div>
+
+  <div class="stack"><h4>🗄️ Base de datos</h4><ul>
+    <li>Usamos <b>MySQL / MariaDB</b> (con <b>XAMPP</b>), base de datos <span class="k">tienda_pc</span>. <b>Hibernate</b> crea las tablas automáticamente a partir de las entidades.</li>
+  </ul></div>
+
+  <div class="stack"><h4>💻 Frontend</h4><ul>
+    <li><b>Librería de interfaz:</b> <b>React 18</b>. &nbsp; <b>Servidor de desarrollo / empaquetado:</b> <b>Vite 5</b>.</li>
+    <li><b>Navegación:</b> <b>React Router</b> (rutas públicas vs rutas protegidas del panel).</li>
+    <li><b>Gráficos del dashboard:</b> <b>Recharts</b>.</li>
+    <li><b>Peticiones HTTP:</b> <b>fetch</b> nativo, centralizado en <span class="path">client.js</span> (agrega el token y hace el refresco automático).</li>
+    <li><b>Estado de sesión:</b> <b>React Context</b> (<span class="path">AuthContext</span>).</li>
+    <li><b>Íconos:</b> Bootstrap Icons. &nbsp; <b>Avisos:</b> sistema de <b>toasts</b> propio.</li>
+  </ul></div>
+
+  <div class="stack"><h4>✅ Validaciones</h4><ul>
+    <li><b>Formato de entrada:</b> <b>Bean Validation (Jakarta)</b> con <code>@Valid</code> y anotaciones (<code>@NotBlank</code>, <code>@Size</code>, <code>@Email</code>, <code>@Pattern</code>) en los DTOs de request.</li>
+    <li><b>Reglas de negocio / datos únicos:</b> métodos <code>existsBy…</code> de los repositorios; si algo está duplicado, el Service lanza un error <b>409</b>.</li>
+    <li><b>Errores uniformes:</b> un <b>@RestControllerAdvice</b> (GlobalExceptionHandler) convierte cualquier error en un JSON <code>{ "error": "…" }</code>, y el front lo muestra como <b>toast</b>.</li>
+  </ul></div>
+
+  <div class="stack"><h4>🌐 Integraciones · 📄 Reportes · 🖼️ Imágenes · 🧪 Pruebas</h4><ul>
+    <li><b>Datos reales de personas (RENIEC):</b> consumimos la API <b>apiperu.dev</b> por DNI, usando <b>RestClient</b> de Spring (con <b>timeouts</b>); es <i>best-effort</i> (si falla, no rompe el sistema).</li>
+    <li><b>Reporte PDF:</b> usamos la librería <b>OpenPDF</b> para armar el PDF de pedidos (tabla + totales).</li>
+    <li><b>Imágenes:</b> se guardan en el <b>sistema de archivos</b> del proyecto (<span class="path">uploads/productos/</span>), se sirven en <span class="k">/images/**</span> con un <b>resource handler</b>, y la subida usa <b>multipart</b> de Spring. En la BD solo va la ruta.</li>
+    <li><b>Pruebas:</b> <b>JUnit 5</b> + <b>Spring Boot Test</b> (MockMvc) sobre una BD <b>H2</b> en memoria; <b>spring-security-test</b> para simular un usuario autenticado.</li>
+    <li><b>Datos de prueba:</b> un <b>CommandLineRunner</b> (DataSeeder) que carga la BD al arrancar, de forma idempotente.</li>
+  </ul></div>
+</section>
+
+<!-- ================= PARTE 1 ================= -->
+<section class="sec" style="--c:#6366f1;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#6366f1,#818cf8);"><div class="n">1</div><div><h2>Arquitectura y modelo de datos</h2><div class="who">Responsable: __________</div></div></div>
+  <p class="resumen">El cimiento sobre el que trabajan todos: cómo se organiza el código en capas y cómo las clases de Java se convierten en las tablas de la base de datos.</p>
+
+  <div class="card"><h4><span class="ic">🎯</span>¿Qué hace?</h4>
+    <p>Define la <b>estructura del proyecto</b> (capas del backend) y el <b>modelo de datos</b> (las entidades). Al arrancar el sistema, Hibernate lee las entidades y <b>crea las tablas</b> automáticamente. Todos los demás módulos se apoyan en esta base.</p>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — cómo nacen las tablas y cómo viaja una petición</h4>
+    <div class="flow-title">A) Al arrancar el backend</div>
+    <ol class="flow">
+      <li>Spring Boot inicia (<b>GamerStoreApplication.main()</b>) y se conecta a la BD <span class="k">tienda_pc</span> (config en <span class="path">application.properties</span>).</li>
+      <li><b>Hibernate</b> lee las clases <code>@Entity</code> de <span class="path">model/</span> y <b>crea/actualiza las tablas</b> (<code>producto</code>, <code>categoria</code>, <code>cliente</code>, <code>pedido</code>, <code>pedido_item</code>, <code>usuario</code>, <code>refresh_token</code>).</li>
+    </ol>
+    <div class="flow-title">B) El viaje de una petición (ejemplo genérico)</div>
+    <ol class="flow">
+      <li>La <b>pantalla</b> (React) llama a una función de <span class="path">endpoints.js</span>.</li>
+      <li><span class="path">client.js</span> hace el <code>fetch</code> a <span class="k">/api/...</span> con el token.</li>
+      <li>El <b>Controller</b> recibe → el <b>Service</b> aplica reglas → el <b>Repository</b> toca la BD.</li>
+      <li>El <b>Mapper</b> convierte la Entidad en un <b>DTO</b> → el Controller devuelve <b>JSON</b> → la pantalla se actualiza.</li>
+    </ol>
+    <div class="ex"><b>📌 ¿Por qué DTO y no la entidad directa?</b> El <b>DTO</b> lleva solo los campos que la pantalla necesita. Ejemplo: al listar productos NO enviamos el objeto <code>Categoria</code> completo, solo <code>categoriaNombre</code>. Así la API no depende de cómo esté hecha la tabla y no exponemos datos internos.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🗃️</span>Modelo de datos (entidades = tablas)</h4>
+    <ul class="files">
+      <li><b>Producto</b> (<code>producto</code>): nombre <i>(único)</i>, descripcion, precio, imagen <i>(ruta)</i>, stock → <b>pertenece a una</b> Categoria.</li>
+      <li><b>Categoria</b> (<code>categoria</code>): nombre <i>(único)</i> → <b>tiene muchos</b> Productos.</li>
+      <li><b>Cliente</b> (<code>cliente</code>): dni <i>(único)</i>, nombres, apellidos, email, telefono, direccion.</li>
+      <li><b>Pedido</b> (<code>pedido</code>): fecha, estado, total, metodoPago → <b>pertenece a un</b> Cliente y <b>tiene muchos</b> PedidoItem.</li>
+      <li><b>PedidoItem</b> (<code>pedido_item</code>): cantidad, precioUnitario → une un Pedido con un Producto (una línea de la venta).</li>
+      <li><b>Usuario</b> (<code>usuario</code>): username <i>(único)</i>, email <i>(único)</i>, password <i>(BCrypt)</i>, rol.</li>
+      <li><b>RefreshToken</b> (<code>refresh_token</code>): token, expiraEn, revocado → para el manejo de sesión.</li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">📁</span>Carpetas y archivos</h4>
+    <ul class="files">
+      <li><span class="path">src/main/java/com/gamerstore/app/model/</span> — las entidades.</li>
+      <li><span class="path">src/main/resources/application.properties</span> — conexión a la BD y configuración.</li>
+      <li><span class="path">…/controller · service · repository · dto · mapper</span> — las capas del backend.</li>
+      <li><span class="path">GamerStoreApplication.java</span> — arranque del sistema.</li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">👀</span>Qué mostrar en el código</h4>
+    <p><b>model/Producto.java</b>: <code>@Entity</code>, <code>@Column(unique=true)</code> en <code>nombre</code>, y <code>@ManyToOne</code> a Categoria (la relación). &nbsp;·&nbsp; La estructura de carpetas (las 6 capas) para mostrar la separación por responsabilidades.</p>
+  </div>
+  <div class="demo"><b>▶ Demo:</b> abre <b>phpMyAdmin</b> (XAMPP) → BD <b>tienda_pc</b> → muestra las tablas y cómo se relacionan (por ejemplo, <code>pedido_item</code> apunta a <code>pedido</code> y a <code>producto</code>).</div>
+
+  <div class="card"><h4><span class="ic">❓</span>Preguntas típicas + respuesta</h4>
+    <div class="qa" style="border-color:#6366f1;"><div class="q">¿Quién crea las tablas?</div><div class="a">Hibernate, a partir de las anotaciones <code>@Entity/@Column</code> de las entidades. No escribimos el <code>CREATE TABLE</code> a mano.</div></div>
+    <div class="qa" style="border-color:#6366f1;"><div class="q">¿Qué es una relación @ManyToOne / @OneToMany?</div><div class="a">Muchos productos pertenecen a una categoría (@ManyToOne); una categoría tiene muchos productos (@OneToMany). En la tabla se guarda la llave foránea <code>categoria_id</code>.</div></div>
+    <div class="qa" style="border-color:#6366f1;"><div class="q">¿Para qué sirven las capas (Controller/Service/Repository)?</div><div class="a">Para separar responsabilidades: el Controller atiende la web, el Service tiene las reglas, el Repository habla con la BD. Así es más ordenado, se prueba mejor y se cambia sin romper todo.</div></div>
+  </div>
+</section>
+
+<!-- ================= PARTE 2 ================= -->
+<section class="sec" style="--c:#f59e0b;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><div class="n">2</div><div><h2>Datos reales + imágenes en el proyecto</h2><div class="who">Responsable: __________</div></div></div>
+  <p class="resumen">De dónde salen los datos que se ven en el panel (la carga inicial) y cómo se guardan las imágenes de los productos dentro del proyecto, no en la base de datos.</p>
+
+  <div class="card"><h4><span class="ic">🎯</span>¿Qué hace?</h4>
+    <p>Al arrancar, el sistema <b>llena la base de datos</b> con datos reales de tecnología (categorías, productos con precios en soles, clientes y pedidos históricos). Además, las <b>imágenes de los productos</b> se almacenan como archivos en el proyecto y en la BD solo se guarda su <b>ruta</b>.</p>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo A — Carga inicial de datos (al arrancar)</h4>
+    <ol class="flow">
+      <li>Arranca <b>DataSeeder</b> (un <code>CommandLineRunner</code>, se ejecuta 1 vez). Es <b>idempotente</b>: solo siembra si la tabla está vacía (<code>count()==0</code>).</li>
+      <li>Inserta <b>10 categorías</b> y <b>28 productos</b> (con la ruta de su imagen local y precio en S/).</li>
+      <li>Para cada cliente, consulta su <b>DNI en RENIEC</b> (apiperu.dev) y usa el <b>nombre real</b>; si la API falla, usa un nombre de respaldo.</li>
+      <li>Genera <b>~40 pedidos</b> con fechas repartidas en los últimos 6 meses (para que el dashboard tenga historia).</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo real:</b> al sembrar el cliente con DNI <b>70123456</b>, el sistema llama a RENIEC y guarda <b>“FIORELLA DE LA SOTA CASTRO”</b> (nombre real), no un nombre inventado.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo B — Subir la imagen de un producto</h4>
+    <ol class="flow">
+      <li><b>AdminProductos.jsx</b> → al elegir un archivo, <code>subirImagen()</code> → <b>AdminAPI.subirImagen(formData)</b> → <span class="k">POST /api/admin/uploads</span> (multipart, con token).</li>
+      <li><b>UploadController.subir()</b> valida que sea imagen y ≤ 5 MB, la guarda con un nombre único (<code>UUID</code>) en <span class="path">uploads/productos/</span>.</li>
+      <li>Devuelve la ruta: <b>UploadResponse</b> <code>{ url: "/images/productos/a1b2c3.jpg" }</code>.</li>
+      <li>El front guarda esa <b>ruta</b> en el formulario y muestra la <b>vista previa</b>. Al guardar el producto, en la BD solo se guarda ese texto.</li>
+    </ol>
+    <div class="ex"><b>📌 ¿Y cómo se ve la imagen después?</b> El navegador pide <span class="k">/images/productos/a1b2c3.jpg</span>; un <b>resource handler</b> en <b>WebConfig</b> la sirve desde la carpeta del proyecto. Nunca pasa por la base de datos.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">📁</span>Carpetas y archivos</h4>
+    <ul class="files">
+      <li><span class="path">…/config/DataSeeder.java</span> — la carga inicial de datos.</li>
+      <li><span class="path">…/controller/UploadController.java</span> — recibe y guarda la imagen.</li>
+      <li><span class="path">…/config/WebConfig.java</span> — sirve las imágenes en <span class="k">/images/**</span>.</li>
+      <li><span class="path">uploads/productos/</span> — las imágenes físicas (dentro del proyecto).</li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">👀</span>Qué mostrar en el código</h4>
+    <p><b>DataSeeder.java</b>: el <code>if (count()==0)</code> y la lista de productos con <code>/images/productos/…</code>. &nbsp;·&nbsp; <b>UploadController.java</b>: cómo genera el nombre con <code>UUID</code> y usa <code>Files.copy(...)</code>.</p>
+  </div>
+  <div class="demo"><b>▶ Demo:</b> en Productos → Nuevo → sube una imagen (aparece la vista previa) → guarda; luego abre la carpeta <b>uploads/productos/</b> y muestra el archivo nuevo.</div>
+
+  <div class="card"><h4><span class="ic">❓</span>Preguntas típicas + respuesta</h4>
+    <div class="qa" style="border-color:#f59e0b;"><div class="q">¿Por qué la imagen no va en la base de datos?</div><div class="a">Guardar archivos binarios en la BD la hace pesada y lenta. Guardamos el <b>archivo en el proyecto</b> y en la BD solo la <b>ruta</b> (un texto corto).</div></div>
+    <div class="qa" style="border-color:#f59e0b;"><div class="q">¿El seeder duplica los datos si reinicio?</div><div class="a">No. Solo siembra cuando la tabla está vacía (<code>count()==0</code>), así que es seguro reiniciar.</div></div>
+    <div class="qa" style="border-color:#f59e0b;"><div class="q">¿Cómo validan la imagen subida?</div><div class="a">El <b>UploadController</b> revisa que el tipo empiece por <code>image/</code> y que no supere 5 MB; además el nombre lo genera el servidor (UUID), no el usuario.</div></div>
+  </div>
+</section>
+
+<!-- ================= PARTE 3 ================= -->
+<section class="sec" style="--c:#e11d48;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#e11d48,#fb7185);"><div class="n">3</div><div><h2>Seguridad: login JWT + sesión</h2><div class="who">Responsable: __________</div></div></div>
+  <p class="resumen">Cómo se protege el panel: el login entrega un token, cada petición lo lleva, y la sesión se renueva sola sin sacar al usuario.</p>
+
+  <div class="card"><h4><span class="ic">🎯</span>¿Qué hace?</h4>
+    <p>Da <b>autenticación real</b>. Sin iniciar sesión no se puede entrar al panel ni llamar a los endpoints <span class="k">/api/admin/**</span>. El token de acceso dura poco (5 min) y se <b>renueva automáticamente</b> con un <i>refresh token</i>; un contador muestra el tiempo restante.</p>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo A — Iniciar sesión</h4>
+    <ol class="flow">
+      <li><b>Login.jsx</b> → <code>submit()</code> → <b>AuthContext.login()</b> → <b>AuthAPI.login()</b> → <span class="k">POST /api/auth/login</span> con <code>{username, password}</code>.</li>
+      <li><b>AuthController.login()</b> valida con <b>AuthenticationManager</b> + <b>CustomUserDetailsService</b> (busca en tabla <span class="k">usuario</span>) y compara la clave con <b>BCrypt</b>.</li>
+      <li>Si es correcto: <b>JwtService.generarAccess()</b> firma el <b>access token</b> (5 min) y <b>RefreshTokenService.crear()</b> guarda un <b>refresh token</b> en la tabla <span class="k">refresh_token</span>.</li>
+      <li>Devuelve <b>LoginResponse</b> <code>{accessToken, refreshToken, username, nombre, rol}</code>; el front lo guarda en <code>localStorage</code>.</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo:</b> ingresas <code>admin123 / gamerstore123</code> → recibes un access token (un texto largo tipo <code>eyJhbGci…</code>) que dice “soy admin123, rol ADMIN, vence en 5 min”.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo B — Cada petición al panel</h4>
+    <ol class="flow">
+      <li><span class="path">client.js</span> agrega la cabecera <span class="k">Authorization: Bearer &lt;token&gt;</span> a la petición.</li>
+      <li><b>JwtAuthenticationFilter</b> (en el backend) valida la firma y la expiración del token y marca al usuario como autenticado.</li>
+      <li><b>SecurityConfig</b> comprueba que <span class="k">/api/admin/**</span> exige rol <b>ADMIN</b>. Si el token es válido → pasa; si no → <b>401</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo C — Refresco silencioso (lo más ingenioso)</h4>
+    <ol class="flow">
+      <li>Pasados 5 min, una petición devuelve <b>401</b> (el access venció).</li>
+      <li><span class="path">client.js</span> lo detecta y llama <b>una sola vez</b> a <span class="k">POST /api/auth/refresh</span> con el refresh token.</li>
+      <li><b>RefreshTokenService.rotar()</b> valida el refresh en la BD, lo <b>revoca</b> y crea uno nuevo (rotación). Devuelve tokens nuevos.</li>
+      <li><span class="path">client.js</span> guarda los nuevos y <b>reintenta la petición original</b> — el usuario nunca se entera. Si el refresh ya no vale → recién ahí va a <span class="k">/admin/login</span>.</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo:</b> estás editando un producto a los 6 minutos. Guardas → el access venció → el sistema pide uno nuevo por detrás y tu guardado se completa igual, sin pedirte volver a loguear.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo D — Recargar (F5) / Cerrar sesión / Contador</h4>
+    <ol class="flow">
+      <li><b>Restaurar sesión:</b> al recargar, <b>AuthContext</b> llama <span class="k">GET /api/auth/me</span> → <b>AuthController.me()</b> devuelve el usuario → la sesión sigue.</li>
+      <li><b>Cerrar sesión:</b> <b>Sidebar.jsx</b> → <span class="k">POST /api/auth/logout</span> → <b>RefreshTokenService.revocar()</b> anula el refresh en la BD; el front limpia <code>localStorage</code>.</li>
+      <li><b>Contador:</b> <b>SessionTimer.jsx</b> lee el campo <code>exp</code> dentro del token y muestra la cuenta atrás (no hace peticiones).</li>
+    </ol>
+  </div>
+
+  <div class="card"><h4><span class="ic">📁</span>Carpetas y archivos</h4>
+    <ul class="files">
+      <li><span class="path">…/config/security/</span> — JwtService, JwtAuthenticationFilter, SecurityConfig, CustomUserDetailsService, RefreshTokenService.</li>
+      <li><span class="path">…/controller/AuthController.java</span> — login, refresh, logout, me.</li>
+      <li><span class="path">frontend/src/api/client.js</span> — token + refresco automático · <span class="path">auth/AuthContext.jsx</span> · <span class="path">components/admin/SessionTimer.jsx</span> · <span class="path">pages/admin/Login.jsx</span>.</li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">👀</span>Qué mostrar en el código</h4>
+    <p><b>SecurityConfig.java</b>: la lista <code>authorizeHttpRequests(...)</code> con <code>permitAll()</code> vs <code>hasRole("ADMIN")</code>. &nbsp;·&nbsp; <b>client.js</b>: el bloque que, ante un 401, llama a <i>refresh</i> y reintenta.</p>
+  </div>
+  <div class="demo"><b>▶ Demo:</b> DevTools → Application → Local Storage: muestra <code>gs_token</code> y <code>gs_refresh</code>. En el panel, al minuto final el contador se pone ámbar y, al pasar los 5 min, la sesión se renueva sola.</div>
+
+  <div class="card"><h4><span class="ic">❓</span>Preguntas típicas + respuesta</h4>
+    <div class="qa" style="border-color:#e11d48;"><div class="q">¿Qué es un JWT?</div><div class="a">Un token firmado que lleva el usuario y su rol. El servidor verifica la firma en cada petición y no necesita guardar sesión en memoria (stateless).</div></div>
+    <div class="qa" style="border-color:#e11d48;"><div class="q">¿Por qué access corto (5 min) + refresh largo?</div><div class="a">Si roban el access, expira rápido. El refresh vive en la BD y se puede <b>revocar</b>, lo que permite cerrar sesión de verdad.</div></div>
+    <div class="qa" style="border-color:#e11d48;"><div class="q">¿Dónde se protege el panel?</div><div class="a">En <b>SecurityConfig</b>: <code>/api/admin/**</code> exige el rol ADMIN. Sin token válido, la API responde 401 y el front manda al login.</div></div>
+    <div class="qa" style="border-color:#e11d48;"><div class="q">¿Cómo guardan las contraseñas?</div><div class="a">Con <b>BCrypt</b> (hash de una vía). Nunca en texto plano; ni nosotros podemos “ver” la contraseña original.</div></div>
+  </div>
+</section>
+
+<!-- ================= PARTE 4 ================= -->
+<section class="sec" style="--c:#0ea5e9;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);"><div class="n">4</div><div><h2>Productos y Categorías</h2><div class="who">Responsable: __________</div></div></div>
+  <p class="resumen">El corazón del catálogo: crear, editar y eliminar productos y categorías, con validación de nombres únicos y las reglas que protegen los datos.</p>
+
+  <div class="card"><h4><span class="ic">🎯</span>¿Qué hace?</h4>
+    <p>Permite administrar el <b>catálogo</b>: el CRUD (crear, listar, editar, eliminar) de <b>productos</b> y <b>categorías</b>. Evita nombres duplicados y no deja borrar una categoría que tiene productos.</p>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Crear un producto</h4>
+    <ol class="flow">
+      <li><b>AdminProductos.jsx</b> → <code>guardar()</code> arma <code>{nombre, descripcion, precio, stock, imagen, categoriaId}</code> → <b>AdminAPI.crearProducto()</b> → <span class="k">POST /api/admin/productos</span>.</li>
+      <li><b>AdminProductoController.crear()</b> valida el formato con <code>@Valid</code> → <b>ProductoService.crear()</b>.</li>
+      <li class="rule"><b>Regla:</b> <b>ProductoRepository.existsByNombreIgnoreCase()</b> → si ya existe, lanza <b>409</b> “Ya existe un producto con ese nombre”.</li>
+      <li>Si no existe → asocia la categoría y <b>ProductoRepository.save()</b> → tabla <span class="k">producto</span>.</li>
+      <li>Vuelve como <b>ProductoDTO</b> (JSON) → <b>UI:</b> toast “Producto creado” y la tabla se refresca.</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo:</b> intentas crear “NVIDIA GeForce RTX 4070” pero ya existe → el backend responde 409 y el front muestra un <b>toast rojo</b> “Ya existe un producto con ese nombre”; el producto NO se crea.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Listar / Editar / Eliminar / Categorías</h4>
+    <ol class="flow">
+      <li><b>Listar:</b> <span class="k">GET /api/admin/productos</span> → <b>ProductoService.todos()</b> → <b>ProductoRepository.findAll()</b> → tabla.</li>
+      <li><b>Editar:</b> <span class="k">PUT …/{id}</span> → <b>actualizar()</b> [valida con <code>existsByNombreIgnoreCaseAndIdNot</code>].</li>
+      <li><b>Eliminar:</b> pide confirmación → <span class="k">DELETE …/{id}</span> → <code>deleteById()</code>.</li>
+      <li><b>Categorías:</b> mismo patrón (<span class="k">/api/admin/categorias</span>). Al <b>eliminar</b>, si <b>existsByCategoriaId()</b> es true (la categoría tiene productos) → <b>bloquea</b> el borrado.</li>
+    </ol>
+    <div class="ex"><b>📌 Nota:</b> <b>buscar, ordenar y paginar</b> la tabla NO llama al backend: lo hace el hook <b>useTableControls.js</b> en el navegador, sobre la lista ya cargada (es instantáneo).</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">📁</span>Carpetas y archivos</h4>
+    <ul class="files">
+      <li><span class="path">frontend/src/pages/admin/AdminProductos.jsx · AdminCategorias.jsx</span></li>
+      <li><span class="path">…/controller/AdminProductoController.java · AdminCategoriaController.java</span></li>
+      <li><span class="path">…/service/ProductoService.java · CategoriaService.java</span> · <span class="path">…/repository/…</span></li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">👀</span>Qué mostrar en el código</h4>
+    <p><b>ProductoService.crear()</b>: la línea <code>existsByNombreIgnoreCase</code> que lanza el 409. &nbsp;·&nbsp; <b>CategoriaService.eliminar()</b>: el bloqueo con <code>existsByCategoriaId</code>.</p>
+  </div>
+  <div class="demo"><b>▶ Demo:</b> crea un producto con un nombre que ya existe (sale el toast rojo), crea uno nuevo válido, edítalo, y muestra que no puedes borrar una categoría que tiene productos.</div>
+
+  <div class="card"><h4><span class="ic">❓</span>Preguntas típicas + respuesta</h4>
+    <div class="qa" style="border-color:#0ea5e9;"><div class="q">¿Dónde evitan los nombres duplicados?</div><div class="a">En el <b>Service</b>, con <code>existsByNombreIgnoreCase</code> del repositorio; si existe, lanzamos un 409 que el front muestra como toast.</div></div>
+    <div class="qa" style="border-color:#0ea5e9;"><div class="q">¿La búsqueda de la tabla pega al servidor cada vez?</div><div class="a">No. Traemos la lista una vez y filtramos/ordenamos en el navegador con <b>useTableControls</b>. Es más rápido y no recarga la API.</div></div>
+    <div class="qa" style="border-color:#0ea5e9;"><div class="q">¿Por qué no se puede borrar una categoría con productos?</div><div class="a">Porque los productos quedarían “huérfanos”. El Service lo verifica con <code>existsByCategoriaId</code> y bloquea el borrado.</div></div>
+  </div>
+</section>
+
+<!-- ================= PARTE 5 ================= -->
+<section class="sec" style="--c:#8b5cf6;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><div class="n">5</div><div><h2>Clientes (RENIEC), Pedidos y Reporte PDF</h2><div class="who">Responsable: __________</div></div></div>
+  <p class="resumen">La parte de ventas: clientes con datos reales por DNI, el registro de pedidos con cálculo del total, y la descarga del reporte en PDF.</p>
+
+  <div class="card"><h4><span class="ic">🎯</span>¿Qué hace?</h4>
+    <p>Gestiona <b>clientes</b> (autocompletando nombres reales desde RENIEC por DNI), registra <b>ventas/pedidos</b> calculando el total, y genera un <b>reporte PDF</b> de pedidos con filtros.</p>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Buscar cliente por DNI (RENIEC)</h4>
+    <ol class="flow">
+      <li><b>AdminClientes.jsx</b> → <code>buscarDni()</code> (valida 8 dígitos) → <b>AdminAPI.buscarDni(dni)</b> → <span class="k">GET /api/admin/clientes/reniec/{dni}</span>.</li>
+      <li><b>AdminClienteController.reniec()</b> → <b>ReniecService.consultarDni()</b> llama a <b>apiperu.dev</b> con <b>RestClient</b> (con timeouts) usando el token.</li>
+      <li><i>Best-effort:</i> si la API responde → <b>ReniecPersona</b> <code>{nombres, apellidos}</code>; si falla → <b>404</b> sin romper nada.</li>
+      <li><b>UI:</b> autocompleta nombres y apellidos + toast “Datos obtenidos de RENIEC”. Al guardar, valida DNI y email únicos.</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo:</b> escribes <b>70123456</b> y pulsas “Buscar” → se llenan automáticamente “FIORELLA” / “DE LA SOTA CASTRO”; solo completas teléfono y dirección.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Registrar un pedido</h4>
+    <ol class="flow">
+      <li>En <b>AdminPedidos.jsx</b> eliges cliente y agregas productos con <code>agregarItem()</code> (el total se calcula en el front mientras armas la venta).</li>
+      <li>Al enviar → <b>guardar()</b> manda <code>{clienteId, metodoPago, items:[{productoId, cantidad}]}</code> → <span class="k">POST /api/admin/pedidos</span>.</li>
+      <li><b>PedidoService.crear()</b>: busca el cliente; por cada ítem busca el producto, crea un <b>PedidoItem</b> con el precio actual y <b>suma el subtotal</b>.</li>
+      <li><b>PedidoRepository.save()</b> guarda el <span class="k">pedido</span> y sus <span class="k">pedido_item</span> juntos (cascade). El total queda calculado en el backend.</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo con números:</b> vendes 2× “RTX 4070” (S/2,599) + 1× “Ryzen 5 5600” (S/549). El front manda <code>items:[{2,2},{5,1}]</code>. El Service calcula <b>2×2599 + 1×549 = S/5,747</b> y guarda el pedido con ese total.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Descargar el reporte PDF</h4>
+    <ol class="flow">
+      <li><b>descargarPDF()</b> arma la URL con los filtros (fecha/estado) → <b>downloadBlob()</b> hace <span class="k">GET /api/admin/pedidos/reporte.pdf?…</span> con el token.</li>
+      <li><b>AdminPedidoController.reporte()</b> → <b>PedidoService.reporte()</b> filtra los pedidos → <b>PedidoReporteService.generar()</b> arma el PDF con <b>OpenPDF</b> (encabezado, tabla, total).</li>
+      <li>El backend devuelve el archivo (<code>Content-Disposition: attachment</code>) → el navegador lo <b>descarga</b> como <code>reporte-pedidos.pdf</code>.</li>
+    </ol>
+    <div class="ex"><b>📌 Extra:</b> el estado del pedido (PENDIENTE, PAGADO, ENVIADO, ENTREGADO, CANCELADO) se cambia con el lápiz → <span class="k">PUT …/{id}</span> y el badge de la tabla cambia de color.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">📁</span>Carpetas y archivos</h4>
+    <ul class="files">
+      <li><span class="path">frontend/src/pages/admin/AdminClientes.jsx · AdminPedidos.jsx</span></li>
+      <li><span class="path">…/controller/AdminClienteController.java (/reniec/{dni}) · AdminPedidoController.java (/reporte.pdf)</span></li>
+      <li><span class="path">…/service/ClienteService · PedidoService · ReniecService · PedidoReporteService</span></li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">👀</span>Qué mostrar en el código</h4>
+    <p><b>ReniecService.consultarDni()</b>: el llamado con <code>RestClient</code>, los <b>timeouts</b> y el <code>try/catch</code> best-effort. &nbsp;·&nbsp; <b>PedidoService.crear()</b>: el bucle que suma el <code>subtotal</code>. &nbsp;·&nbsp; <b>PedidoReporteService.generar()</b>: cómo arma la tabla del PDF.</p>
+  </div>
+  <div class="demo"><b>▶ Demo:</b> Clientes → Nuevo → DNI <b>70123456</b> → “Buscar” (se autocompleta). Pedidos → arma una venta con 2–3 productos (mira el total) → “Registrar” → “Descargar PDF”.</div>
+
+  <div class="card"><h4><span class="ic">❓</span>Preguntas típicas + respuesta</h4>
+    <div class="qa" style="border-color:#8b5cf6;"><div class="q">¿De dónde salen los nombres reales?</div><div class="a">De la API <b>apiperu.dev</b> (RENIEC), consultando por DNI desde <b>ReniecService</b>.</div></div>
+    <div class="qa" style="border-color:#8b5cf6;"><div class="q">¿Qué pasa si esa API se cae?</div><div class="a">Nada grave: es <i>best-effort</i> con timeouts. Si falla, el flujo continúa (el seeder usa un nombre de respaldo; el formulario muestra un aviso).</div></div>
+    <div class="qa" style="border-color:#8b5cf6;"><div class="q">¿Dónde se calcula el total del pedido?</div><div class="a">En el <b>PedidoService</b>, en el backend: por cada ítem hace <code>precio × cantidad</code> y suma. No se confía en el total que manda el front.</div></div>
+    <div class="qa" style="border-color:#8b5cf6;"><div class="q">¿Cómo generan el PDF?</div><div class="a">Con la librería <b>OpenPDF</b> en <b>PedidoReporteService</b>; el endpoint devuelve el archivo para descarga.</div></div>
+  </div>
+</section>
+
+<!-- ================= PARTE 6 ================= -->
+<section class="sec" style="--c:#14b8a6;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#14b8a6,#2dd4bf);"><div class="n">6</div><div><h2>Dashboard, Usuarios y validaciones</h2><div class="who">Responsable: __________</div></div></div>
+  <p class="resumen">Lo que da “terminado” al sistema: el tablero con indicadores, la gestión de usuarios del panel y cómo los errores/duplicados llegan al usuario como avisos claros.</p>
+
+  <div class="card"><h4><span class="ic">🎯</span>¿Qué hace?</h4>
+    <p>Muestra el <b>dashboard</b> (indicadores del negocio y productos más vendidos), administra los <b>usuarios</b> del sistema (con cifrado de contraseña y protección del último admin), y centraliza el <b>manejo de errores</b> que se muestran como toasts.</p>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Cargar el Dashboard</h4>
+    <ol class="flow">
+      <li><b>Dashboard.jsx</b> → <b>AdminAPI.dashboard()</b> → <span class="k">GET /api/admin/dashboard</span>.</li>
+      <li><b>AdminDashboardController</b> junta: <code>count()</code> de cada repositorio; <b>PedidoRepository.sumTotal()</b> (ventas); <b>findByStockLessThanEqual…()</b> (stock bajo); <b>PedidoRepository.topProductos()</b> (agrupa <span class="k">pedido_item</span> por producto y suma cantidades).</li>
+      <li>Devuelve <b>DashboardDTO</b> {totales, totalVentas, stockBajo[], topProductos[]}.</li>
+      <li><b>UI:</b> tarjetas KPI, gráficos (Recharts) y el panel “Más vendidos”.</li>
+    </ol>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Usuarios del sistema</h4>
+    <ol class="flow">
+      <li><b>Listar/Crear/Editar/Eliminar</b> contra <span class="k">/api/admin/usuarios</span> → <b>UsuarioService</b>.</li>
+      <li class="rule"><b>Reglas:</b> <b>existsByUsername()</b> / <b>existsByEmail()</b> → si están repetidos, error; la contraseña se <b>hashea con BCrypt</b> antes de guardar.</li>
+      <li class="rule"><b>Protección:</b> al eliminar, si es el <b>último ADMIN</b> (<code>countByRol(ADMIN) &lt;= 1</code>) → lo bloquea, para no quedarnos sin acceso.</li>
+    </ol>
+    <div class="ex"><b>📌 Ejemplo:</b> intentas eliminar al único administrador → el sistema responde “No puedes eliminar el último administrador” y no lo borra.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">🔄</span>Flujo — Cómo un error/duplicado llega al usuario (transversal)</h4>
+    <ol class="flow">
+      <li>El <b>Service</b> lanza una excepción con mensaje (ej. <code>409 "La categoría ya existe"</code>).</li>
+      <li><b>GlobalExceptionHandler</b> (@RestControllerAdvice) la convierte en <code>{ "error": "La categoría ya existe" }</code> con el código correcto.</li>
+      <li><span class="path">client.js</span> ve que no es 2xx, lee el <code>error</code> y lanza <code>Error(mensaje)</code>.</li>
+      <li>La pantalla, en el <code>catch</code>, hace <b>toast.error(mensaje)</b> → aparece el aviso rojo. El registro NO se crea.</li>
+    </ol>
+    <div class="ex"><b>📌 Códigos que usa la API:</b> <span class="k">400</span> datos inválidos · <span class="k">401</span> no autenticado · <span class="k">404</span> no encontrado · <span class="k">409</span> duplicado o en uso · <span class="k">413</span> imagen muy grande.</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">📁</span>Carpetas y archivos</h4>
+    <ul class="files">
+      <li><span class="path">frontend/src/pages/admin/Dashboard.jsx · AdminUsuarios.jsx</span> · <span class="path">components/ui/Toast.jsx</span></li>
+      <li><span class="path">…/controller/AdminDashboardController · AdminUsuarioController · GlobalExceptionHandler</span></li>
+      <li><span class="path">…/service/UsuarioService.java</span> (+ las validaciones <code>existsBy…</code> en los demás services)</li>
+    </ul>
+  </div>
+
+  <div class="card"><h4><span class="ic">👀</span>Qué mostrar en el código</h4>
+    <p><b>GlobalExceptionHandler.java</b>: cada <code>@ExceptionHandler</code> y a qué status mapea. &nbsp;·&nbsp; <b>UsuarioService.eliminar()</b>: el <code>if</code> que protege al último admin. &nbsp;·&nbsp; <b>Dashboard.jsx</b>: cómo usa <code>data.topProductos</code>.</p>
+  </div>
+  <div class="demo"><b>▶ Demo:</b> intenta crear una categoría repetida (sale el toast rojo), muestra el dashboard con los gráficos y “Más vendidos”, y crea un usuario nuevo desde el módulo Usuarios.</div>
+
+  <div class="card"><h4><span class="ic">❓</span>Preguntas típicas + respuesta</h4>
+    <div class="qa" style="border-color:#14b8a6;"><div class="q">¿Cómo evitan datos duplicados en todo el sistema?</div><div class="a">Con métodos <code>existsBy…</code> en los repositorios; si existe, el Service lanza un 409 y el <b>GlobalExceptionHandler</b> lo convierte en un mensaje que se ve como toast.</div></div>
+    <div class="qa" style="border-color:#14b8a6;"><div class="q">¿De dónde salen los “más vendidos”?</div><div class="a">De una consulta (<code>PedidoRepository.topProductos</code>) que agrupa las líneas de pedido por producto y suma las cantidades.</div></div>
+    <div class="qa" style="border-color:#14b8a6;"><div class="q">¿Por qué protegen al último admin?</div><div class="a">Para no quedarnos sin acceso al panel. Si solo queda un ADMIN, el sistema no permite eliminarlo.</div></div>
+  </div>
+</section>
+
+<!-- ================= APÉNDICE ================= -->
+<section class="sec" style="--c:#334155;">
+  <div class="sec-head" style="background:linear-gradient(135deg,#334155,#64748b);"><div class="n">★</div><div><h2>Apéndice — Cómo levantar el proyecto, estructura y glosario</h2><div class="who">Para la demo y para entender los términos</div></div></div>
+
+  <div class="card"><h4><span class="ic">▶</span>Cómo levantar el proyecto (para el que hace la demo)</h4>
+    <ol class="flow">
+      <li>Iniciar <b>MySQL</b> en <b>XAMPP</b> (la BD <span class="k">tienda_pc</span> se crea sola si no existe).</li>
+      <li><b>Backend:</b> en la raíz del proyecto, ejecutar <code>mvnw.cmd spring-boot:run</code> → levanta en <span class="k">:8080</span> y carga los datos de prueba.</li>
+      <li><b>Frontend:</b> en la carpeta <span class="path">frontend/</span>, ejecutar <code>npm install</code> (la primera vez) y luego <code>npm run dev</code> → abre en <span class="k">:5173</span>.</li>
+      <li>Entrar al panel en <span class="k">http://localhost:5173/admin</span> con <b>admin123</b> / <b>gamerstore123</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card"><h4><span class="ic">🗂️</span>Estructura de carpetas</h4>
+    <div class="flowline" style="font-size:8.3pt;">gamerstore-main/
+├─ src/main/java/com/gamerstore/app/
+│  ├─ model/        (entidades = tablas)
+│  ├─ repository/   (acceso a datos, Spring Data JPA)
+│  ├─ service/      (reglas de negocio, validaciones)
+│  ├─ controller/   (endpoints /api/...)
+│  ├─ dto/  mapper/ (objetos de transferencia + conversión)
+│  └─ config/       (seeder, seguridad JWT, web)
+├─ src/main/resources/application.properties
+├─ src/test/…       (pruebas de integración)
+├─ uploads/productos/     (imágenes guardadas en el proyecto)
+└─ frontend/src/
+   ├─ pages/admin/    (pantallas del panel)
+   ├─ components/     (navbar, tabla, toast, modal…)
+   ├─ api/            (client.js = fetch + token; endpoints.js)
+   ├─ auth/           (contexto de sesión + ruta protegida)
+   └─ utils/  hooks/  config/</div>
+  </div>
+
+  <div class="card"><h4><span class="ic">📖</span>Glosario (por si preguntan un término)</h4>
+    <ul class="files">
+      <li><b>API REST:</b> conjunto de URLs (<span class="k">/api/...</span>) por donde el front pide y envía datos en formato JSON.</li>
+      <li><b>Endpoint:</b> una de esas URLs con su método (GET/POST/PUT/DELETE), p. ej. <span class="k">POST /api/admin/productos</span>.</li>
+      <li><b>JWT (JSON Web Token):</b> un token firmado que identifica al usuario; el servidor lo verifica sin guardar sesión (stateless).</li>
+      <li><b>Stateless:</b> el servidor no guarda la sesión en memoria; toda la info va en el token de cada petición.</li>
+      <li><b>Hash / BCrypt:</b> transformar la contraseña en un texto irreversible; se compara, pero no se puede “des-hacer”.</li>
+      <li><b>ORM (JPA/Hibernate):</b> traduce entre objetos de Java (entidades) y tablas de la base de datos, sin escribir SQL a mano.</li>
+      <li><b>DTO:</b> objeto simple que lleva solo los datos que la pantalla necesita (lo que viaja como JSON).</li>
+      <li><b>Mapper:</b> el que convierte una Entidad en su DTO.</li>
+      <li><b>CRUD:</b> Crear, Leer (listar), Actualizar y Eliminar — las 4 operaciones básicas de un módulo.</li>
+      <li><b>Cascade:</b> al guardar/borrar un Pedido, sus líneas (PedidoItem) se guardan/borran con él automáticamente.</li>
+      <li><b>Multipart:</b> el formato con el que el navegador sube archivos (las imágenes).</li>
+      <li><b>Best-effort:</b> “se intenta, pero si falla no rompe nada” (así consultamos RENIEC).</li>
+    </ul>
+  </div>
+
+  <div class="tip"><b>💡 Cierre:</b> si dominan el <b>viaje de una petición</b> (portada) y esta chuleta de <b>“qué usamos para qué”</b>, pueden explicar y defender cualquier parte del ERP.</div>
+</section>
+
+</div>
+</body>
+</html>
