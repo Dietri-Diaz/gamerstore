@@ -139,7 +139,7 @@
                         <td class="val" th:text="'S/ ' + ${#numbers.formatDecimal(c.subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                     </tr>
                     <tr>
-                        <td class="lbl">I.G.V. (18%)</td>
+                        <td class="lbl">I.G.V. (<span th:text="${igvPorcentaje}">18</span>%)</td>
                         <td class="val" th:text="'S/ ' + ${#numbers.formatDecimal(c.igv, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</td>
                     </tr>
                     <tr class="fila-total">

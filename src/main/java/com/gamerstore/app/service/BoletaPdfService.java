@@ -42,15 +42,18 @@ public class BoletaPdfService {
     private final String razonSocial;
     private final String ruc;
     private final String direccionEmpresa;
+    private final double igvTasa;
 
     public BoletaPdfService(TemplateEngine templateEngine,
                             @Value("${app.empresa.razon-social}") String razonSocial,
                             @Value("${app.empresa.ruc}") String ruc,
-                            @Value("${app.empresa.direccion}") String direccionEmpresa) {
+                            @Value("${app.empresa.direccion}") String direccionEmpresa,
+                            @Value("${app.comprobante.igv:0.18}") double igvTasa) {
         this.templateEngine = templateEngine;
         this.razonSocial = razonSocial;
         this.ruc = ruc;
         this.direccionEmpresa = direccionEmpresa;
+        this.igvTasa = igvTasa;
     }
 
     /** Arma el PDF de la boleta (comprobante + ítems del pedido) renderizando la plantilla boleta.html. */
@@ -66,6 +69,9 @@ public class BoletaPdfService {
             ctx.setVariable("enLetras", NumeroALetras.convertir(c.getTotal()));
             ctx.setVariable("qr", generarQrDataUri(textoQr(c)));
             ctx.setVariable("fechaTexto", c.getFechaEmision() != null ? c.getFechaEmision().format(FMT_FECHA) : "—");
+            // El porcentaje del IGV sale de la configuración (app.comprobante.igv), NO escrito a
+            // mano en la plantilla: así si cambia la tasa, el PDF muestra el valor correcto.
+            ctx.setVariable("igvPorcentaje", Math.round(igvTasa * 100));
 
             String html = templateEngine.process("boleta", ctx);
 

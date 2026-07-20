@@ -101,7 +101,9 @@ public class GlobalExceptionHandler {
         return body(HttpStatus.CONFLICT, "Operación no permitida: conflicto de datos");
     }
 
-    // 413 Payload Too Large: el archivo subido (p. ej. en UploadController) supera el límite configurado (5MB).
+    // 413 Payload Too Large: el archivo subido (p. ej. en UploadController) supera el límite
+    // configurado en spring.servlet.multipart.max-file-size (si cambias esa propiedad,
+    // actualiza también el texto de abajo).
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, Object>> tooLarge(MaxUploadSizeExceededException e) {
         return body(HttpStatus.PAYLOAD_TOO_LARGE, "La imagen supera el tamaño máximo (5MB)");
