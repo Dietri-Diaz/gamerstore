@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.gamerstore.app.config.security.LoginBloqueadoException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> auth(AuthenticationException e) {
         return body(HttpStatus.UNAUTHORIZED, "Usuario o contraseña incorrectos");
+    }
+
+    /** Login bloqueado por demasiados intentos fallidos (429). Incluye los segundos restantes. */
+    @ExceptionHandler(LoginBloqueadoException.class)
+    public ResponseEntity<Map<String, Object>> loginBloqueado(LoginBloqueadoException e) {
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("error", e.getMessage());
+        resp.put("segundosRestantes", e.getSegundosRestantes());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(resp);
     }
 
     /**

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext.jsx'
 import { getUser } from '../../api/client.js'
+import { useAutoClear } from '../../hooks/useAutoClear.js'
 import Alert from '../../components/ui/Alert.jsx'
 
 // Página de login del panel admin (ERP)
@@ -12,21 +13,48 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [bloqueo, setBloqueo] = useState(0) // segundos restantes del bloqueo por intentos fallidos (429)
+  const prevBloqueo = useRef(0)
 
   // Si ya hay una sesión guardada, saltamos directo al panel sin mostrar el formulario
   useEffect(() => {
     if (getUser()) navigate('/admin', { replace: true })
   }, [navigate])
 
+  // Cuenta atrás del bloqueo: mientras queden segundos, baja de a uno cada 1s
+  useEffect(() => {
+    if (bloqueo <= 0) return
+    const t = setInterval(() => setBloqueo((s) => s - 1), 1000)
+    return () => clearInterval(t)
+  }, [bloqueo])
+
+  // Cuando el bloqueo llega a 0 (detecta la transición desde >0), limpia el formulario
+  // automáticamente para que el usuario reintente con los campos en blanco.
+  useEffect(() => {
+    if (prevBloqueo.current > 0 && bloqueo === 0) {
+      setUsername('')
+      setPassword('')
+      setError('')
+    }
+    prevBloqueo.current = bloqueo
+  }, [bloqueo])
+
+  // Mientras no haya bloqueo activo, el mensaje de error se borra solo a los 5s
+  useAutoClear(error, setError)
+
   // Envía usuario/contraseña, y si el login es correcto redirige al panel admin
   const submit = async (e) => {
     e.preventDefault()
+    if (bloqueo > 0) return
     setError('')
     setLoading(true)
     try {
       await login(username, password)
       navigate('/admin')
     } catch (err) {
+      if (err.status === 429 && err.data?.segundosRestantes) {
+        setBloqueo(err.data.segundosRestantes)
+      }
       setError(err.message)
     } finally {
       setLoading(false)
@@ -53,7 +81,12 @@ export default function Login() {
             Inicia sesión para gestionar productos, clientes y ventas.
           </p>
 
-          {error && <Alert type="error">{error}</Alert>}
+          {/* Mientras hay bloqueo activo mostramos el contador; si no, el error normal (se borra solo a los 5s) */}
+          {bloqueo > 0 ? (
+            <Alert type="error">Demasiados intentos fallidos. Espera {bloqueo} segundo(s).</Alert>
+          ) : (
+            error && <Alert type="error">{error}</Alert>
+          )}
 
           <form onSubmit={submit}>
             <div className="field">
@@ -65,11 +98,12 @@ export default function Login() {
                 <input
                   className="input"
                   type="text"
-                  placeholder="admin123"
+                  placeholder="Tu usuario o email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   autoFocus
+                  disabled={bloqueo > 0}
                 />
               </div>
             </div>
@@ -87,23 +121,16 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={bloqueo > 0}
                 />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={loading}>
-              <i className="bi bi-box-arrow-in-right" /> {loading ? 'Ingresando...' : 'Ingresar al ERP'}
+            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={loading || bloqueo > 0}>
+              <i className="bi bi-box-arrow-in-right" />{' '}
+              {bloqueo > 0 ? `Bloqueado (${bloqueo}s)` : loading ? 'Ingresando...' : 'Ingresar al ERP'}
             </button>
           </form>
-
-          <div className="login-demo">
-            <strong style={{ color: 'var(--accent)' }}>
-              <i className="bi bi-info-circle" /> Demo:
-            </strong>
-            <div className="text-muted" style={{ marginTop: '0.25rem' }}>
-              Usuario: <code>admin123</code> · Contraseña: <code>gamerstore123</code>
-            </div>
-          </div>
         </div>
       </div>
     </div>
