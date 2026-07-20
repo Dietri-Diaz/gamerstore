@@ -9,8 +9,10 @@ import com.gamerstore.app.repository.ClienteRepository;
 import com.gamerstore.app.repository.PedidoRepository;
 import com.gamerstore.app.repository.ProductoRepository;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -69,9 +71,17 @@ public class PedidoService {
         }).toList();
     }
 
-    /** Registra un pedido: arma sus lineas, calcula el total y lo guarda (cascade). */
+    /** Registra un pedido: arma sus lineas, valida y descuenta stock, calcula el total y lo guarda (cascade). */
     @Transactional
     public Pedido crear(Long clienteId, String metodoPago, List<PedidoItemRequest> items) {
+        // Solo TARJETA o YAPE: EFECTIVO/PLIN/TRANSFERENCIA eran del sistema anterior
+        // (venta cotizada por WhatsApp, sin pago ni boleta) y ya no aplican.
+        if (metodoPago != null && !metodoPago.isBlank()
+                && !metodoPago.equalsIgnoreCase("TARJETA") && !metodoPago.equalsIgnoreCase("YAPE")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Método de pago no válido. Solo se acepta TARJETA o YAPE.");
+        }
+
         Cliente cliente = clienteRepo.findById(clienteId)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
 
@@ -84,9 +94,20 @@ public class PedidoService {
         for (PedidoItemRequest it : items) {
             Producto prod = productoRepo.findById(it.productoId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+
+            // Valida stock real (misma regla para el POS del admin y el checkout publico).
+            if (prod.getStock() < it.cantidad()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Stock insuficiente para " + prod.getNombre() + " (quedan " + prod.getStock() + ")");
+            }
+
             PedidoItem item = new PedidoItem(pedido, prod, it.cantidad(), prod.getPrecio());
             pedido.getItems().add(item);
             total += item.getSubtotal();
+
+            // Descuenta el stock vendido.
+            prod.setStock(prod.getStock() - it.cantidad());
+            productoRepo.save(prod);
         }
         pedido.setTotal(total);
         return pedidoRepo.save(pedido);

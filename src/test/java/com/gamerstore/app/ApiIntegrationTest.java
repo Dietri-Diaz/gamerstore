@@ -87,7 +87,7 @@ class ApiIntegrationTest {
         // cliente 1 y producto 1 vienen del DataSeeder
         mvc.perform(post("/api/admin/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"clienteId\":1,\"metodoPago\":\"EFECTIVO\"," +
+                        .content("{\"clienteId\":1,\"metodoPago\":\"TARJETA\"," +
                                 "\"items\":[{\"productoId\":1,\"cantidad\":2}]}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"))

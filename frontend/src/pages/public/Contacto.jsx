@@ -11,9 +11,9 @@ const info = [
 
 // Pasos del proceso de compra, mostrados en la sección "¿Cómo comprar?"
 const pasos = [
-  { n: '1', t: 'Elige tu producto', d: 'Explora el catálogo y elige el equipo que necesitas.' },
-  { n: '2', t: 'Cotiza por WhatsApp', d: 'Haz click en "Cotizar" y nuestro asesor te confirma stock y precio final.' },
-  { n: '3', t: 'Paga y recibe', d: 'Coordinamos pago, envío o recojo en tienda. ¡Listo para jugar!' },
+  { n: '1', t: 'Elige tu producto', d: 'Explora el catálogo y agrégalo al carrito.' },
+  { n: '2', t: 'Paga en línea', d: 'Completa el checkout y paga con Yape (hasta S/500) o tarjeta.' },
+  { n: '3', t: 'Recibe tu pedido', d: 'Te llega tu boleta al instante y el equipo en 24-48h. ¡Listo para jugar!' },
 ]
 
 // Página de contacto público: acceso directo a WhatsApp, datos de la tienda y pasos para comprar
@@ -31,8 +31,8 @@ export default function Contacto() {
             Hablemos del <span className="accent">setup ideal</span>
           </h1>
           <p className="lead" style={{ margin: '0 auto' }}>
-            La forma más rápida de comprar en GamerStore es por WhatsApp. Te asesoramos, cotizamos y
-            coordinamos entrega o recojo en tienda.
+            Compra en línea desde el catálogo, con pago seguro y boleta automática.
+            ¿Tienes dudas sobre un producto? Escríbenos por WhatsApp.
           </p>
         </div>
       </section>
@@ -45,10 +45,10 @@ export default function Contacto() {
               <i className="bi bi-whatsapp" />
             </div>
             <h3 style={{ fontSize: '1.3rem' }}>WhatsApp</h3>
-            <p className="text-muted">Asesor gamer en línea. Respuesta inmediata.</p>
+            <p className="text-muted">Escríbenos por WhatsApp si tienes dudas sobre un producto.</p>
             <h4 style={{ margin: '0.75rem 0 1rem' }}>+51 986 969 024</h4>
             <a
-              href={waUrl(whatsappNumero, 'Hola GamerStore, quiero información sobre sus productos')}
+              href={waUrl(whatsappNumero, 'Hola GamerStore, tengo una duda sobre un producto')}
               target="_blank"
               rel="noreferrer"
               className="btn btn-whatsapp btn-lg"

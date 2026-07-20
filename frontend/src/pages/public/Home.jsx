@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PublicAPI } from '../../api/endpoints.js'
-import { useConfig } from '../../config/ConfigContext.jsx'
-import { waUrl } from '../../utils/format.js'
 import ProductCard from '../../components/public/ProductCard.jsx'
 import ProductGridSkeleton from '../../components/public/ProductGridSkeleton.jsx'
 
 // Página de inicio pública: hero de bienvenida, razones para comprar y productos destacados
 export default function Home() {
-  const { whatsappNumero } = useConfig()
   const [destacados, setDestacados] = useState(null)
 
   // Al montar, trae los productos y muestra solo los primeros 8 como "destacados"
@@ -31,20 +28,12 @@ export default function Home() {
               Lleva tu setup al <span className="accent">siguiente nivel</span>
             </h1>
             <p className="lead">
-              Consolas, periféricos pro y monitores 240Hz. Cotiza por WhatsApp y recibe en 24-48h.
+              Consolas, periféricos pro y monitores 240Hz. Compra online y recibe en 24-48h.
             </p>
             <div className="hero-actions">
               <Link to="/productos" className="btn btn-primary">
                 <i className="bi bi-grid-3x3-gap-fill" /> Explorar catálogo
               </Link>
-              <a
-                href={waUrl(whatsappNumero, 'Hola GamerStore, quiero cotizar un producto')}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-whatsapp"
-              >
-                <i className="bi bi-whatsapp" /> Cotizar ahora
-              </a>
             </div>
           </div>
           <div>
@@ -70,9 +59,9 @@ export default function Home() {
             <p>Solo trabajamos con marcas oficiales. Garantía real respaldada.</p>
           </div>
           <div className="feature">
-            <div className="feature-icon"><i className="bi bi-whatsapp" /></div>
-            <h3>Atención personalizada</h3>
-            <p>Cotiza por WhatsApp con un especialista gamer en tiempo real.</p>
+            <div className="feature-icon"><i className="bi bi-credit-card-2-front-fill" /></div>
+            <h3>Pago 100% online</h3>
+            <p>Paga con Yape o tarjeta y recibe tu boleta al instante.</p>
           </div>
         </div>
       </section>
@@ -110,21 +99,16 @@ export default function Home() {
             boxShadow: 'var(--shadow-sm)',
           }}
         >
-          <div className="feature-icon" style={{ background: 'var(--success-soft)', color: 'var(--whatsapp)' }}>
-            <i className="bi bi-whatsapp" />
+          <div className="feature-icon" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+            <i className="bi bi-controller" />
           </div>
-          <h3 style={{ fontSize: '1.5rem' }}>¿Listo para cotizar?</h3>
+          <h3 style={{ fontSize: '1.5rem' }}>¿Listo para armar tu setup?</h3>
           <p className="text-muted" style={{ margin: '0.5rem 0 1.5rem' }}>
-            Habla con un asesor gamer por WhatsApp. Te ayudamos a armar tu setup ideal.
+            Explora el catálogo completo y compra en línea con pago seguro.
           </p>
-          <a
-            href={waUrl(whatsappNumero, 'Hola GamerStore, necesito una cotización')}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-whatsapp btn-lg"
-          >
-            <i className="bi bi-whatsapp" /> Chatear con asesor
-          </a>
+          <Link to="/productos" className="btn btn-primary btn-lg">
+            <i className="bi bi-grid-3x3-gap-fill" /> Explorar catálogo
+          </Link>
         </div>
       </section>
     </>

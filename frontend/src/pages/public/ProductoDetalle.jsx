@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { PublicAPI } from '../../api/endpoints.js'
-import { useConfig } from '../../config/ConfigContext.jsx'
-import { money, waUrl, sku } from '../../utils/format.js'
+import { useCarrito } from '../../carrito/CarritoContext.jsx'
+import { useToast } from '../../components/ui/Toast.jsx'
+import { money, sku } from '../../utils/format.js'
 import ProductCard from '../../components/public/ProductCard.jsx'
 import Spinner from '../../components/ui/Spinner.jsx'
 
 // Página de detalle de un producto público: info completa, especificaciones y productos relacionados
 export default function ProductoDetalle() {
   const { id } = useParams()
-  const { whatsappNumero } = useConfig()
+  const navigate = useNavigate()
+  const { agregar } = useCarrito()
+  const toast = useToast()
   const [data, setData] = useState(null)
   const [error, setError] = useState(false)
+  const [cantidad, setCantidad] = useState(1)
 
   // Carga el producto (y sus relacionados) cada vez que cambia el id en la URL
   useEffect(() => {
     setData(null)
     setError(false)
+    setCantidad(1)
     window.scrollTo(0, 0)
     PublicAPI.producto(id)
       .then(setData)
@@ -48,7 +53,19 @@ export default function ProductoDetalle() {
   }
 
   const { producto: p, relacionados } = data
-  const mensaje = `Hola GamerStore, me interesa cotizar el producto *${p.nombre}* (SKU ${sku(p.id)}). ¿Está disponible?`
+  const sinStock = p.stock === 0
+
+  // Agrega el producto (con la cantidad elegida) al carrito y avisa con un toast
+  const handleAgregar = () => {
+    agregar(p, cantidad)
+    toast.success('Agregado al carrito')
+  }
+
+  // Agrega el producto y va directo al checkout, sin quedarse en esta página
+  const handleComprarAhora = () => {
+    agregar(p, cantidad)
+    navigate('/checkout')
+  }
 
   return (
     <section className="section container">
@@ -92,6 +109,30 @@ export default function ProductoDetalle() {
 
           <p className="text-muted" style={{ marginBottom: '1rem' }}>{p.descripcion}</p>
 
+          {/* Selector de cantidad y acciones de compra */}
+          <div className="detail-buy">
+            <div className="qty-selector">
+              <label className="label">Cantidad</label>
+              <input
+                className="input qty-input"
+                type="number"
+                min={1}
+                max={p.stock}
+                value={cantidad}
+                disabled={sinStock}
+                onChange={(e) => setCantidad(Math.max(1, Math.min(Number(e.target.value) || 1, p.stock)))}
+              />
+            </div>
+            <div className="detail-buy-actions">
+              <button className="btn btn-outline btn-lg" disabled={sinStock} onClick={handleAgregar}>
+                <i className="bi bi-cart-plus" /> {sinStock ? 'Sin stock' : 'Agregar al carrito'}
+              </button>
+              <button className="btn btn-primary btn-lg" disabled={sinStock} onClick={handleComprarAhora}>
+                <i className="bi bi-lightning-charge-fill" /> {sinStock ? 'Sin stock' : 'Comprar ahora'}
+              </button>
+            </div>
+          </div>
+
           <div className="spec-card">
             <h5 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>
               <i className="bi bi-info-circle" /> Especificaciones
@@ -116,11 +157,8 @@ export default function ProductoDetalle() {
             </div>
           </div>
 
-          <a href={waUrl(whatsappNumero, mensaje)} target="_blank" rel="noreferrer" className="btn btn-whatsapp btn-lg btn-block">
-            <i className="bi bi-whatsapp" /> Cotizar por WhatsApp
-          </a>
           <p className="text-center text-muted" style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>
-            <i className="bi bi-shield-check" /> Respuesta inmediata · Asesor gamer · Sin compromiso
+            <i className="bi bi-shield-check" /> Compra segura · Pago con Yape o tarjeta · Boleta automática
           </p>
         </div>
       </div>

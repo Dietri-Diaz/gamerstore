@@ -10,16 +10,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
-/** Siembra data real de tecnología: categorías, productos (imágenes locales),
- *  clientes y pedidos históricos (últimos ~6 meses). Idempotente por tabla. */
+/** Siembra data real de tecnología: categorías, productos (imágenes locales) y
+ *  clientes. Idempotente por tabla. */
 @Component
 public class DataSeeder implements CommandLineRunner {
 
@@ -29,20 +25,18 @@ public class DataSeeder implements CommandLineRunner {
     private final ProductoRepository productoRepo;
     private final UsuarioRepository usuarioRepo;
     private final ClienteRepository clienteRepo;
-    private final PedidoRepository pedidoRepo;
     private final PasswordEncoder passwordEncoder;
     private final ReniecService reniecService;
 
     // Inyeccion por constructor de todos los repositorios y servicios que necesita el seeder.
     public DataSeeder(CategoriaRepository categoriaRepo, ProductoRepository productoRepo,
                       UsuarioRepository usuarioRepo, ClienteRepository clienteRepo,
-                      PedidoRepository pedidoRepo, PasswordEncoder passwordEncoder,
+                      PasswordEncoder passwordEncoder,
                       ReniecService reniecService) {
         this.categoriaRepo = categoriaRepo;
         this.productoRepo = productoRepo;
         this.usuarioRepo = usuarioRepo;
         this.clienteRepo = clienteRepo;
-        this.pedidoRepo = pedidoRepo;
         this.passwordEncoder = passwordEncoder;
         this.reniecService = reniecService;
     }
@@ -122,48 +116,9 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Seed: clientes creados");
         }
 
-        // ===== PEDIDOS HISTORICOS (ultimos ~6 meses) =====
-        if (pedidoRepo.count() == 0) {
-            List<Producto> productos = productoRepo.findAll();
-            List<Cliente> clientes = clienteRepo.findAll();
-            if (!productos.isEmpty() && !clientes.isEmpty()) {
-                Random rnd = new Random(20260711L); // semilla fija => reproducible
-                String[] metodos = {"EFECTIVO", "TARJETA", "YAPE", "PLIN", "TRANSFERENCIA"};
-                String[] estados = {"PENDIENTE", "PAGADO", "ENVIADO", "ENTREGADO", "ENTREGADO", "CANCELADO"};
-                int nPedidos = 40;
-                // Genera 40 pedidos con cliente, metodo de pago, estado y fecha aleatorios
-                // (pero reproducibles por la semilla fija de arriba).
-                for (int i = 0; i < nPedidos; i++) {
-                    Pedido pedido = new Pedido();
-                    pedido.setCliente(clientes.get(rnd.nextInt(clientes.size())));
-                    pedido.setMetodoPago(metodos[rnd.nextInt(metodos.length)]);
-                    pedido.setEstado(estados[rnd.nextInt(estados.length)]);
-                    // fecha repartida en los ultimos 180 dias
-                    pedido.setFecha(LocalDateTime.now()
-                            .minusDays(rnd.nextInt(180))
-                            .minusHours(rnd.nextInt(24))
-                            .minusMinutes(rnd.nextInt(60)));
-
-                    int nItems = 1 + rnd.nextInt(4); // 1..4 lineas
-                    double total = 0;
-                    List<Integer> usados = new ArrayList<>();
-                    // Arma las lineas del pedido eligiendo productos al azar y sumando el total.
-                    for (int j = 0; j < nItems; j++) {
-                        int idx = rnd.nextInt(productos.size());
-                        if (usados.contains(idx)) continue; // evita repetir producto en el mismo pedido
-                        usados.add(idx);
-                        Producto prod = productos.get(idx);
-                        int cantidad = 1 + rnd.nextInt(3);
-                        PedidoItem item = new PedidoItem(pedido, prod, cantidad, prod.getPrecio());
-                        pedido.getItems().add(item);
-                        total += item.getSubtotal();
-                    }
-                    pedido.setTotal(total);
-                    pedidoRepo.save(pedido);
-                }
-                log.info("Seed: {} pedidos historicos creados", nPedidos);
-            }
-        }
+        // NOTA: ya no se siembran pedidos historicos. Toda venta entra por el ecommerce
+        // (checkout con pago real y emision de boleta), asi que los pedidos se crean solos
+        // al comprar. Sembrar ventas ficticias sin pago ni boleta rompia esa coherencia.
 
         // ===== ADMIN POR DEFECTO =====
         if (!usuarioRepo.existsByRol(Rol.ADMIN)) {
