@@ -86,4 +86,20 @@ public class ClienteService {
     public void eliminar(Long id) {
         repo.deleteById(id);
     }
+
+    /** ¿Ya existe un cliente con ese DNI? Si viene id, lo excluye (para validar en vivo al editar). */
+    public boolean existeDni(String dni, Long id) {
+        if (dni == null || dni.isBlank()) return false;
+        return id == null
+                ? repo.existsByDni(dni.trim())
+                : repo.existsByDniAndIdNot(dni.trim(), id);
+    }
+
+    /** ¿Ya existe un cliente con ese email? Si viene id, lo excluye (para validar en vivo al editar). */
+    public boolean existeEmail(String email, Long id) {
+        if (email == null || email.isBlank()) return false;
+        return id == null
+                ? repo.existsByEmailIgnoreCase(email.trim())
+                : repo.existsByEmailIgnoreCaseAndIdNot(email.trim(), id);
+    }
 }

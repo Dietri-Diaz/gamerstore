@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AdminAPI } from '../../api/endpoints.js'
 import { useTableControls } from '../../hooks/useTableControls.js'
+import { useAutoClear } from '../../hooks/useAutoClear.js'
+import { useDuplicado } from '../../hooks/useDuplicado.js'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { useConfirm } from '../../components/ui/Confirm.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -29,6 +31,22 @@ export default function AdminClientes() {
     pageSize: 8,
     initialSort: { key: 'nombreCompleto', dir: 'asc' },
   })
+
+  // El mensaje de error del formulario se borra solo a los 5s (no se queda estático).
+  useAutoClear(formError, setFormError)
+
+  // Aviso en vivo si el DNI ya está registrado (solo al crear: al editar el DNI está bloqueado).
+  const dupDni = useDuplicado(
+    form.dni,
+    (v) => AdminAPI.existeCliente({ dni: v, id: editing?.id }),
+    { activo: showModal && !editing, minLargo: 8 }
+  )
+  // Aviso en vivo si el email ya está registrado por otro cliente.
+  const dupEmail = useDuplicado(
+    form.email,
+    (v) => AdminAPI.existeCliente({ email: v, id: editing?.id }),
+    { activo: showModal, minLargo: 5 }
+  )
 
   const cargar = () => AdminAPI.clientes().then(setClientes).catch(() => setClientes([]))
 
@@ -221,7 +239,7 @@ export default function AdminClientes() {
           footer={
             <>
               <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={guardar} disabled={saving}>
+              <button className="btn btn-primary" onClick={guardar} disabled={saving || dupDni.duplicado || dupEmail.duplicado}>
                 <i className="bi bi-check2" /> {saving ? 'Guardando...' : 'Guardar'}
               </button>
             </>
@@ -234,7 +252,7 @@ export default function AdminClientes() {
                 <label className="label">DNI *{editing && ' (no editable)'}</label>
                 <div style={{ display: 'flex', gap: '0.4rem' }}>
                   <input
-                    className="input"
+                    className={'input' + (dupDni.duplicado ? ' input-error' : '')}
                     value={form.dni}
                     onChange={cambiar('dni')}
                     pattern="[0-9]{8}"
@@ -256,6 +274,9 @@ export default function AdminClientes() {
                     </button>
                   )}
                 </div>
+                {dupDni.duplicado && (
+                  <small className="campo-error"><i className="bi bi-exclamation-triangle-fill" /> {dupDni.mensaje}</small>
+                )}
               </div>
               <div className="field">
                 <label className="label">Teléfono</label>
@@ -271,7 +292,10 @@ export default function AdminClientes() {
               </div>
               <div className="field full">
                 <label className="label">Email</label>
-                <input className="input" type="email" value={form.email} onChange={cambiar('email')} />
+                <input className={'input' + (dupEmail.duplicado ? ' input-error' : '')} type="email" value={form.email} onChange={cambiar('email')} />
+                {dupEmail.duplicado && (
+                  <small className="campo-error"><i className="bi bi-exclamation-triangle-fill" /> {dupEmail.mensaje}</small>
+                )}
               </div>
               <div className="field full">
                 <label className="label">Dirección</label>

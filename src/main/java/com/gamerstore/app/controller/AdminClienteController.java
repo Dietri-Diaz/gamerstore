@@ -2,6 +2,7 @@ package com.gamerstore.app.controller;
 
 import com.gamerstore.app.dto.ClienteDTO;
 import com.gamerstore.app.dto.ClienteRequest;
+import com.gamerstore.app.dto.ExisteDTO;
 import com.gamerstore.app.dto.ReniecPersona;
 import com.gamerstore.app.mapper.ClienteMapper;
 import com.gamerstore.app.service.ClienteService;
@@ -65,5 +66,19 @@ public class AdminClienteController {
         return reniecService.consultarDni(dni)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No se encontró el DNI o el servicio no está disponible"));
+    }
+
+    /** Verifica en vivo (mientras el usuario escribe) si el DNI o el email ya están registrados por otro cliente. */
+    @GetMapping("/existe")
+    public ExisteDTO existe(@RequestParam(required = false) String dni,
+                            @RequestParam(required = false) String email,
+                            @RequestParam(required = false) Long id) {
+        if (dni != null && !dni.isBlank() && clienteService.existeDni(dni, id)) {
+            return new ExisteDTO(true, "El DNI ya está registrado");
+        }
+        if (email != null && !email.isBlank() && clienteService.existeEmail(email, id)) {
+            return new ExisteDTO(true, "Ese email ya está registrado");
+        }
+        return new ExisteDTO(false, null);
     }
 }
