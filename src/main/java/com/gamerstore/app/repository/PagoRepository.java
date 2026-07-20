@@ -12,4 +12,9 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
 
     // existsByReferenciaAndMetodo: evita registrar dos veces la misma operación de Yape.
     boolean existsByReferenciaAndMetodo(String referencia, String metodo);
+
+    // findByPedidoIdAndEstado: los pagos de un pedido en cierto estado. Se usa al anular la venta
+    // para ubicar el cobro APROBADO que hay que devolver. Devuelve lista porque un pedido puede
+    // tener varios intentos de pago registrados (p. ej. uno RECHAZADO y después uno APROBADO).
+    List<Pago> findByPedidoIdAndEstado(Long pedidoId, String estado);
 }

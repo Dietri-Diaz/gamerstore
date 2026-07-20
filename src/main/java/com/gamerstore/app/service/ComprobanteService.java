@@ -113,12 +113,23 @@ public class ComprobanteService {
         }).toList();
     }
 
-    // Suma cantidad, operación gravada, IGV y total de una lista de boletas (para el panel de ventas).
+    /**
+     * Suma cantidad, operación gravada, IGV y total de una lista de boletas (para el panel de ventas).
+     *
+     * CONTABILIDAD: las boletas ANULADAS se descuentan de TODOS los totales (incluida la
+     * cantidad). Una venta anulada no es una venta: se devolvió el dinero y se repuso el stock,
+     * así que sumarla inflaría los ingresos y el IGV a pagar.
+     * Ojo: la boleta anulada SÍ sigue apareciendo en el listado (marcada como ANULADA), porque
+     * su correlativo ya se usó y no se puede reutilizar; lo que no hace es sumar.
+     */
     public ResumenVentasDTO resumen(List<Comprobante> lista) {
-        double subtotal = redondear(lista.stream().mapToDouble(Comprobante::getSubtotal).sum());
-        double igv = redondear(lista.stream().mapToDouble(Comprobante::getIgv).sum());
-        double total = redondear(lista.stream().mapToDouble(Comprobante::getTotal).sum());
-        return new ResumenVentasDTO(lista.size(), subtotal, igv, total);
+        List<Comprobante> validas = lista.stream()
+                .filter(c -> !"ANULADO".equals(c.getEstado()))
+                .toList();
+        double subtotal = redondear(validas.stream().mapToDouble(Comprobante::getSubtotal).sum());
+        double igv = redondear(validas.stream().mapToDouble(Comprobante::getIgv).sum());
+        double total = redondear(validas.stream().mapToDouble(Comprobante::getTotal).sum());
+        return new ResumenVentasDTO(validas.size(), subtotal, igv, total);
     }
 
     // Redondea a 2 decimales (soles y céntimos).

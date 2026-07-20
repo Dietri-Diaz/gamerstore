@@ -57,11 +57,22 @@ public class Comprobante {
     @Column(name = "referencia_pago", length = 60)
     private String referenciaPago;
 
+    // "EMITIDO" o "ANULADO" (la venta se reversó: ver AnulacionService)
     @Column(nullable = false, length = 20)
     private String estado = "EMITIDO";
 
     @Column(name = "fecha_emision", nullable = false)
     private LocalDateTime fechaEmision;
+
+    // Por qué se anuló la boleta y cuándo. Nullable: solo las boletas anuladas los tienen
+    // (y la tabla ya tiene filas: con ddl-auto=update no se puede agregar columnas NOT NULL).
+    // La boleta anulada NO se borra ni se reutiliza su correlativo: queda en el registro
+    // marcada como ANULADA, que es como se hace en la facturación de verdad.
+    @Column(name = "motivo_anulacion", length = 200)
+    private String motivoAnulacion;
+
+    @Column(name = "fecha_anulacion")
+    private LocalDateTime fechaAnulacion;
 
     public Comprobante() {}
 
@@ -103,6 +114,10 @@ public class Comprobante {
     public void setEstado(String estado) { this.estado = estado; }
     public LocalDateTime getFechaEmision() { return fechaEmision; }
     public void setFechaEmision(LocalDateTime fechaEmision) { this.fechaEmision = fechaEmision; }
+    public String getMotivoAnulacion() { return motivoAnulacion; }
+    public void setMotivoAnulacion(String motivoAnulacion) { this.motivoAnulacion = motivoAnulacion; }
+    public LocalDateTime getFechaAnulacion() { return fechaAnulacion; }
+    public void setFechaAnulacion(LocalDateTime fechaAnulacion) { this.fechaAnulacion = fechaAnulacion; }
 
     // Getter derivado: código de la boleta con formato SERIE-00000001 (ej. B001-00000001)
     public String getCodigo() { return serie + "-" + String.format("%08d", numero); }

@@ -68,7 +68,8 @@ export default function AdminVentas() {
       <div className="page-head">
         <div>
           <h2>Registro de ventas</h2>
-          <p>Boletas emitidas — base para el libro de ventas</p>
+          {/* Los totales los calcula el backend excluyendo las anuladas: una venta anulada no es venta */}
+          <p>Boletas emitidas — base para el libro de ventas. Los totales no incluyen las boletas anuladas.</p>
         </div>
         {/* Filtros de fecha del reporte: si se dejan vacíos, trae todas las boletas */}
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
@@ -159,7 +160,9 @@ export default function AdminVentas() {
                   </tr>
                 )}
                 {t.paged.map((c) => (
-                  <tr key={c.id}>
+                  // Las boletas anuladas se atenúan pero NO se ocultan: el correlativo
+                  // no se reutiliza, así que la boleta tiene que seguir en el registro.
+                  <tr key={c.id} className={c.estado === 'ANULADO' ? 'fila-anulada' : ''}>
                     <td><strong style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{c.codigo}</strong></td>
                     <td>{c.pedidoCodigo}</td>
                     <td>
@@ -172,7 +175,9 @@ export default function AdminVentas() {
                     <td><strong>{money(c.total)}</strong></td>
                     <td><span className={badgeMetodo(c.metodoPago)}>{c.metodoPago}</span></td>
                     <td>
-                      <span className={c.estado === 'EMITIDO' ? 'badge badge-ok' : 'badge badge-danger'}>{c.estado}</span>
+                      <span className={c.estado === 'EMITIDO' ? 'badge badge-ok' : 'badge badge-danger'}>
+                        {c.estado === 'ANULADO' ? 'ANULADA' : c.estado}
+                      </span>
                     </td>
                     <td>
                       <div className="cell-actions">

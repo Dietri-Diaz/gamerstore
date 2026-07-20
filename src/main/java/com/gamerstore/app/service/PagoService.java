@@ -185,6 +185,13 @@ public class PagoService {
         if ("CANCELADO".equals(pedido.getEstado())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El pedido está cancelado");
         }
+        // Una venta ya anulada NO se puede volver a cobrar: al anularla se devolvió el dinero
+        // y se repuso el stock, así que cobrarla de nuevo vendería un stock que ya volvió al
+        // catálogo y dejaría la boleta anulada apuntando a un pedido "pagado". Si el cliente
+        // se arrepiente de arrepentirse, hace una compra nueva.
+        if ("ANULADO".equals(pedido.getEstado())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El pedido está anulado");
+        }
         return pedido;
     }
 

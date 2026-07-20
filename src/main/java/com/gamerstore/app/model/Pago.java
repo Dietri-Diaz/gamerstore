@@ -24,7 +24,7 @@ public class Pago {
     @Column(nullable = false)
     private double monto;
 
-    // "APROBADO" o "RECHAZADO"
+    // "APROBADO", "RECHAZADO" o "DEVUELTO" (el pago se reversó al anular la venta)
     @Column(nullable = false, length = 20)
     private String estado;
 
@@ -44,6 +44,17 @@ public class Pago {
 
     @Column(nullable = false)
     private LocalDateTime fecha;
+
+    // Comprobante de la devolución: el id del refund de Stripe (re_...) si se devolvió por la
+    // pasarela, o el texto "MANUAL" si hubo que devolver la plata a mano (Yape, pago simulado).
+    // Nullable: solo los pagos devueltos lo tienen (además, la tabla ya tiene filas y con
+    // ddl-auto=update no se puede agregar una columna NOT NULL a una tabla con datos).
+    @Column(name = "referencia_devolucion", length = 60)
+    private String referenciaDevolucion;
+
+    // Cuándo se devolvió el dinero. Nullable por la misma razón.
+    @Column(name = "fecha_devolucion")
+    private LocalDateTime fechaDevolucion;
 
     public Pago() {}
 
@@ -73,6 +84,10 @@ public class Pago {
     public void setVoucher(String voucher) { this.voucher = voucher; }
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+    public String getReferenciaDevolucion() { return referenciaDevolucion; }
+    public void setReferenciaDevolucion(String referenciaDevolucion) { this.referenciaDevolucion = referenciaDevolucion; }
+    public LocalDateTime getFechaDevolucion() { return fechaDevolucion; }
+    public void setFechaDevolucion(LocalDateTime fechaDevolucion) { this.fechaDevolucion = fechaDevolucion; }
 
     // Getter derivado: código de pago con formato PAG-0001
     public String getCodigo() { return String.format("PAG-%04d", id == null ? 0 : id); }

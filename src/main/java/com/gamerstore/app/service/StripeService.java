@@ -5,7 +5,9 @@ import com.stripe.exception.CardException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.PaymentMethod;
+import com.stripe.model.Refund;
 import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.param.RefundCreateParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,10 @@ public class StripeService {
     // para armar el Pago y no hay otra forma de obtenerlo fuera de este servicio)
     public record ResultadoStripe(boolean aprobado, String referencia, String ult4, String marca,
                                   String mensaje, String titular) {}
+
+    // Resultado de la devolución del dinero contra Stripe.
+    // refundId es el id del reembolso (re_...), el comprobante de que la plata volvió.
+    public record ResultadoReembolso(boolean ok, String refundId, String mensaje) {}
 
     private final boolean enabled;
     private final String secretKey;
@@ -83,6 +89,40 @@ public class StripeService {
             log.error("Stripe: no se pudo contactar la pasarela de pagos", e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "No se pudo contactar la pasarela de pagos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Devuelve el dinero de un cobro (reembolso REAL en modo prueba). Recibe el id del
+     * PaymentIntent que se generó al cobrar (pi_...) y devuelve TODO el monto: no hacemos
+     * devoluciones parciales, una venta anulada se devuelve completa.
+     *
+     * Si Stripe falla se lanza 502 en vez de devolver ok=false: quien llama (AnulacionService)
+     * está dentro de una transacción, así que la excepción revierte la anulación entera. Es
+     * preferible dejar la venta como estaba antes que darla por anulada sin haber devuelto la plata.
+     */
+    public ResultadoReembolso reembolsar(String paymentIntentId) {
+        Stripe.apiKey = secretKey;
+        try {
+            RefundCreateParams params = RefundCreateParams.builder()
+                    .setPaymentIntent(paymentIntentId)
+                    .build();
+            Refund refund = Refund.create(params);
+
+            // Stripe marca el reembolso como "succeeded" cuando ya lo procesó; "pending" cuando
+            // aún lo está tramitando con el banco (igual el dinero ya está comprometido).
+            boolean ok = "succeeded".equals(refund.getStatus()) || "pending".equals(refund.getStatus());
+            if (ok) {
+                log.info("Stripe: reembolso {} para el pago {} (estado {})",
+                        refund.getId(), paymentIntentId, refund.getStatus());
+                return new ResultadoReembolso(true, refund.getId(), "Devolución realizada");
+            }
+            return new ResultadoReembolso(false, refund.getId(),
+                    "La devolución no pudo completarse (estado: " + refund.getStatus() + ")");
+        } catch (StripeException e) {
+            log.error("Stripe: fallo la devolucion del pago {}", paymentIntentId, e);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "No se pudo devolver el dinero por la pasarela de pagos: " + e.getMessage());
         }
     }
 }

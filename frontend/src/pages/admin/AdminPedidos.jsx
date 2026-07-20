@@ -13,14 +13,17 @@ import TableSkeleton from '../../components/ui/TableSkeleton.jsx'
 import Pagination from '../../components/ui/Pagination.jsx'
 import PasarelaPago from '../../components/admin/PasarelaPago.jsx'
 
-const ESTADOS = ['PENDIENTE', 'PAGADO', 'ENVIADO', 'ENTREGADO', 'CANCELADO']
+const ESTADOS = ['PENDIENTE', 'PAGADO', 'ENVIADO', 'ENTREGADO', 'CANCELADO', 'ANULADO']
 // Solo estos dos: toda venta pasa por la pasarela (Stripe) o Yape.
 const METODOS = ['TARJETA', 'YAPE']
+// Límites del motivo de anulación (los mismos que valida el backend)
+const MOTIVO_MIN = 5
+const MOTIVO_MAX = 200
 
 // Clase de color para el badge según el estado del pedido
 function badgeEstado(estado) {
   if (estado === 'PAGADO' || estado === 'ENTREGADO') return 'badge badge-ok'
-  if (estado === 'CANCELADO') return 'badge badge-danger'
+  if (estado === 'CANCELADO' || estado === 'ANULADO') return 'badge badge-danger'
   if (estado === 'ENVIADO') return 'badge badge-accent'
   return 'badge badge-warn' // PENDIENTE
 }
@@ -55,6 +58,11 @@ export default function AdminPedidos() {
   // Modal "ver detalle": pedido + el pago con el que se cobró + su boleta
   const [detalle, setDetalle] = useState(null)
   const [cargandoDetalle, setCargandoDetalle] = useState(false)
+
+  // Modal "anular venta": guarda el pedido que se va a anular y el motivo escrito
+  const [anulando, setAnulando] = useState(null)
+  const [motivoAnulacion, setMotivoAnulacion] = useState('')
+  const [anulandoSaving, setAnulandoSaving] = useState(false)
 
   // Reporte PDF
   const [repDesde, setRepDesde] = useState('')
@@ -208,6 +216,34 @@ export default function AdminPedidos() {
     }
   }
 
+  // ---- Anular venta ----
+  // Abre el modal de anulación desde el detalle (se cierra el detalle para no apilar modales)
+  const abrirAnular = (p) => {
+    setDetalle(null)
+    setMotivoAnulacion('')
+    setAnulando(p)
+  }
+
+  // El motivo es obligatorio: el backend exige entre 5 y 200 caracteres.
+  const motivoValido = motivoAnulacion.trim().length >= MOTIVO_MIN && motivoAnulacion.trim().length <= MOTIVO_MAX
+
+  // Anula la venta: el backend repone el stock, devuelve el dinero (Stripe o manual en Yape)
+  // y anula la boleta, todo en una sola transacción. Aquí solo refrescamos la lista.
+  const anular = async () => {
+    if (!motivoValido) return
+    setAnulandoSaving(true)
+    try {
+      await AdminAPI.anularPedido(anulando.id, motivoAnulacion.trim())
+      toast.success('Venta anulada: se repuso el stock y se devolvió el dinero')
+      setAnulando(null)
+      cargar()
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setAnulandoSaving(false)
+    }
+  }
+
   // Pide confirmación y elimina el pedido si el usuario acepta
   const eliminar = async (p) => {
     const ok = await confirm({
@@ -308,7 +344,8 @@ export default function AdminPedidos() {
                         <button className="btn btn-outline btn-icon" onClick={() => verDetalle(p)} title="Ver detalle">
                           <i className="bi bi-eye" />
                         </button>
-                        {p.estado !== 'PAGADO' && p.estado !== 'CANCELADO' && (
+                        {/* Una venta anulada tampoco se vuelve a cobrar: ya se devolvió el dinero */}
+                        {p.estado !== 'PAGADO' && p.estado !== 'CANCELADO' && p.estado !== 'ANULADO' && (
                           <button className="btn btn-success btn-icon" onClick={() => setCobrando(p)} title="Cobrar">
                             <i className="bi bi-credit-card" />
                           </button>
@@ -465,6 +502,58 @@ export default function AdminPedidos() {
         />
       )}
 
+      {/* Modal "anular venta": exige escribir un motivo y advierte de las consecuencias.
+          No es un confirm simple a propósito: anular mueve dinero, stock y contabilidad. */}
+      {anulando && (
+        <Modal
+          title={`Anular venta ${anulando.codigo}`}
+          icon="bi-x-octagon"
+          size="sm"
+          onClose={() => setAnulando(null)}
+          footer={
+            <>
+              <button className="btn btn-ghost" onClick={() => setAnulando(null)}>Cancelar</button>
+              <button className="btn btn-danger" onClick={anular} disabled={!motivoValido || anulandoSaving}>
+                <i className="bi bi-x-octagon" /> {anulandoSaving ? 'Anulando...' : 'Anular venta'}
+              </button>
+            </>
+          }
+        >
+          <Alert type="error">
+            <span>
+              Se devolverá el dinero al cliente, se repondrá el stock y la boleta quedará anulada.
+              <strong> Esta acción no se puede deshacer.</strong>
+            </span>
+          </Alert>
+
+          <div className="detalle-datos-grid" style={{ marginBottom: '1rem' }}>
+            <div className="detalle-dato">
+              <span>Cliente</span>
+              <strong>{anulando.clienteNombre}</strong>
+            </div>
+            <div className="detalle-dato">
+              <span>Monto a devolver</span>
+              <strong>{money(anulando.total)}</strong>
+            </div>
+          </div>
+
+          <div className="field">
+            <label className="label">Motivo de la anulación *</label>
+            <textarea
+              className="textarea"
+              rows={3}
+              value={motivoAnulacion}
+              onChange={(e) => setMotivoAnulacion(e.target.value.slice(0, MOTIVO_MAX))}
+              maxLength={MOTIVO_MAX}
+              placeholder="Ej. El cliente se arrepintió de la compra"
+            />
+            <small className="text-muted">
+              {motivoAnulacion.trim().length}/{MOTIVO_MAX} — mínimo {MOTIVO_MIN} caracteres. Queda registrado en la boleta anulada.
+            </small>
+          </div>
+        </Modal>
+      )}
+
       {/* Modal "ver detalle": ítems del pedido + el pago con el que se cobró + su boleta, todo junto */}
       {detalle && (
         <Modal
@@ -472,7 +561,20 @@ export default function AdminPedidos() {
           icon="bi-eye"
           size="lg"
           onClose={() => setDetalle(null)}
-          footer={<button className="btn btn-ghost" onClick={() => setDetalle(null)}>Cerrar</button>}
+          footer={
+            <>
+              {/* Anular solo tiene sentido en una venta ya cobrada: es lo que hay que devolver.
+                  Incluye ENVIADO y ENTREGADO porque las devoluciones normalmente se piden
+                  DESPUES de recibir el producto. Quedan fuera PENDIENTE (nunca se cobro, se
+                  cancela), CANCELADO y ANULADO (ya no hay nada que devolver). */}
+              {['PAGADO', 'ENVIADO', 'ENTREGADO'].includes(detalle.pedido.estado) && (
+                <button className="btn btn-danger btn-sm" style={{ marginRight: 'auto' }} onClick={() => abrirAnular(detalle.pedido)}>
+                  <i className="bi bi-x-octagon" /> Anular venta
+                </button>
+              )}
+              <button className="btn btn-ghost" onClick={() => setDetalle(null)}>Cerrar</button>
+            </>
+          }
         >
           {/* Cabecera: estado y fecha */}
           <div className="detalle-cabecera">
@@ -482,6 +584,15 @@ export default function AdminPedidos() {
             </span>
           </div>
           <div className="detalle-dato-simple"><strong>Cliente:</strong> {detalle.pedido.clienteNombre}</div>
+
+          {/* Si la venta fue anulada, el motivo se ve arriba de todo */}
+          {detalle.pedido.estado === 'ANULADO' && (
+            <Alert type="error">
+              <span>
+                <strong>Venta anulada.</strong> {detalle.pedido.motivoAnulacion || 'Sin motivo registrado'}
+              </span>
+            </Alert>
+          )}
 
           {/* Ítems del pedido: ya vienen incluidos en el pedido de la lista, no hace falta pedirlos aparte */}
           <div className="detalle-seccion">
@@ -571,7 +682,7 @@ export default function AdminPedidos() {
             ) : (
               <div className="detalle-aviso">
                 <span>Este pedido aún no ha sido cobrado</span>
-                {detalle.pedido.estado !== 'PAGADO' && detalle.pedido.estado !== 'CANCELADO' && (
+                {detalle.pedido.estado !== 'PAGADO' && detalle.pedido.estado !== 'CANCELADO' && detalle.pedido.estado !== 'ANULADO' && (
                   <button
                     className="btn btn-success btn-sm"
                     onClick={() => { const pedido = detalle.pedido; setDetalle(null); setCobrando(pedido) }}

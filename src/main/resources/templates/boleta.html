@@ -63,6 +63,16 @@
     .pie-qr img { width: 115px; height: 115px; }
     .pie-qr .qr-leyenda { font-size: 8pt; color: #94a3b8; margin-top: 6px; }
 
+    /* ===== 0. Banda de ANULADA (solo si la boleta fue anulada) ===== */
+    /* Va arriba de todo y bien saturada a proposito: quien reciba este PDF tiene que darse
+       cuenta al instante de que la venta ya no vale, sin tener que leer la letra chica. */
+    .banda-anulada {
+        background: #b91c1c; color: #ffffff; border-radius: 6px;
+        padding: 14px 18px; margin: 0 0 22px 0; text-align: center;
+    }
+    .banda-anulada .titulo { font-size: 15pt; font-weight: bold; margin: 0; letter-spacing: 1px; }
+    .banda-anulada .detalle { font-size: 9.5pt; margin: 6px 0 0 0; }
+
     /* ===== 7. Aviso DEMO obligatorio ===== */
     .aviso-demo { background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c; text-align: center; border-radius: 6px; padding: 14px; }
     .aviso-demo .principal { font-size: 10pt; font-weight: bold; margin: 0; }
@@ -70,6 +80,12 @@
 </style>
 </head>
 <body>
+
+    <!-- 0. Banda de ANULADA: se dibuja SOLO si el comprobante fue anulado -->
+    <div class="banda-anulada" th:if="${c.estado == 'ANULADO'}">
+        <p class="titulo">ANULADA<span th:if="${!#strings.isEmpty(c.motivoAnulacion)}" th:text="' — ' + ${c.motivoAnulacion}"></span></p>
+        <p class="detalle">Esta boleta fue anulada el <span th:text="${fechaAnulacionTexto}">—</span>. La venta no tiene validez y el importe fue devuelto.</p>
+    </div>
 
     <!-- 1. Cabecera -->
     <table class="encabezado">

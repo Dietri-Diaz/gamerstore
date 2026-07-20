@@ -1,9 +1,11 @@
 package com.gamerstore.app.controller;
 
+import com.gamerstore.app.dto.AnularPedidoRequest;
 import com.gamerstore.app.dto.PedidoDTO;
 import com.gamerstore.app.dto.PedidoRequest;
 import com.gamerstore.app.dto.PedidoUpdateRequest;
 import com.gamerstore.app.mapper.PedidoMapper;
+import com.gamerstore.app.service.AnulacionService;
 import com.gamerstore.app.service.PedidoReporteService;
 import com.gamerstore.app.service.PedidoService;
 import jakarta.validation.Valid;
@@ -23,12 +25,14 @@ public class AdminPedidoController {
     private final PedidoService pedidoService;
     private final PedidoMapper pedidoMapper;
     private final PedidoReporteService reporteService;
+    private final AnulacionService anulacionService;
 
     public AdminPedidoController(PedidoService pedidoService, PedidoMapper pedidoMapper,
-                                 PedidoReporteService reporteService) {
+                                 PedidoReporteService reporteService, AnulacionService anulacionService) {
         this.pedidoService = pedidoService;
         this.pedidoMapper = pedidoMapper;
         this.reporteService = reporteService;
+        this.anulacionService = anulacionService;
     }
 
     // GET /api/admin/pedidos: lista todos los pedidos.
@@ -47,13 +51,22 @@ public class AdminPedidoController {
     // el cálculo de totales y el descuento de stock.
     @PostMapping
     public PedidoDTO crear(@Valid @RequestBody PedidoRequest r) {
-        return pedidoMapper.toDTO(pedidoService.crear(r.clienteId(), r.metodoPago(), r.items()));
+        return pedidoMapper.toDTO(pedidoService.crear(r.clienteId(), r.metodoPago(), r.items(),
+                r.tipoEntrega(), r.direccionEnvio(), r.referenciaEnvio()));
     }
 
     // PUT /api/admin/pedidos/{id}: valida y actualiza el estado y/o método de pago del pedido.
     @PutMapping("/{id}")
     public PedidoDTO actualizar(@PathVariable Long id, @Valid @RequestBody PedidoUpdateRequest r) {
         return pedidoMapper.toDTO(pedidoService.actualizar(id, r.estado(), r.metodoPago()));
+    }
+
+    // POST /api/admin/pedidos/{id}/anular: anula la VENTA (repone stock, devuelve el dinero y
+    // anula la boleta). Distinto de cambiar el estado a CANCELADO con el PUT de arriba: eso solo
+    // marca un pedido que nunca se pagó, no mueve plata ni stock.
+    @PostMapping("/{id}/anular")
+    public PedidoDTO anular(@PathVariable Long id, @Valid @RequestBody AnularPedidoRequest r) {
+        return pedidoMapper.toDTO(anulacionService.anular(id, r.motivo().trim()));
     }
 
     // DELETE /api/admin/pedidos/{id}: elimina el pedido.

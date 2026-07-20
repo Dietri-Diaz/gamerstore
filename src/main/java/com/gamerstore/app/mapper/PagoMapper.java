@@ -27,7 +27,9 @@ public class PagoMapper {
                 p.getTarjetaUlt4(),
                 p.getTitular(),
                 p.getVoucher(),
-                p.getFecha()
+                p.getFecha(),
+                p.getReferenciaDevolucion(),
+                p.getFechaDevolucion()
         );
     }
 }

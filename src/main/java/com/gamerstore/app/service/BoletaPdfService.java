@@ -69,6 +69,10 @@ public class BoletaPdfService {
             ctx.setVariable("enLetras", NumeroALetras.convertir(c.getTotal()));
             ctx.setVariable("qr", generarQrDataUri(textoQr(c)));
             ctx.setVariable("fechaTexto", c.getFechaEmision() != null ? c.getFechaEmision().format(FMT_FECHA) : "—");
+            // Fecha de anulación ya formateada (solo la usa la banda roja de "ANULADA"). Se formatea
+            // aquí, en Java, y no en la plantilla, igual que la fecha de emisión.
+            ctx.setVariable("fechaAnulacionTexto",
+                    c.getFechaAnulacion() != null ? c.getFechaAnulacion().format(FMT_FECHA) : "—");
             // El porcentaje del IGV sale de la configuración (app.comprobante.igv), NO escrito a
             // mano en la plantilla: así si cambia la tasa, el PDF muestra el valor correcto.
             ctx.setVariable("igvPorcentaje", Math.round(igvTasa * 100));

@@ -28,7 +28,9 @@ public class ComprobanteMapper {
                 c.getMetodoPago(),
                 c.getReferenciaPago(),
                 c.getEstado(),
-                c.getFechaEmision()
+                c.getFechaEmision(),
+                c.getMotivoAnulacion(),
+                c.getFechaAnulacion()
         );
     }
 }
