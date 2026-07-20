@@ -14,7 +14,10 @@ export default function Modal({ title, icon, onClose, children, footer, size }) 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className={'modal' + (size === 'sm' ? ' modal-sm' : '')} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={'modal' + (size === 'sm' ? ' modal-sm' : '') + (size === 'lg' ? ' modal-lg' : '')}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h5>
             {icon && <i className={'bi ' + icon} />} {title}

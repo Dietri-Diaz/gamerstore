@@ -110,13 +110,18 @@ async function request(path, { method = 'GET', body } = {}) {
       redirigirLogin()
     }
     let msg = 'Ocurrió un error'
+    let data = null
     try {
-      const data = await res.json()
+      data = await res.json()
       if (data && data.error) msg = data.error
     } catch {
       /* sin cuerpo JSON */
     }
-    throw new Error(msg)
+    // Adjuntamos status y cuerpo para que la pantalla pueda reaccionar (p. ej. el bloqueo 429 del login).
+    const err = new Error(msg)
+    err.status = res.status
+    err.data = data
+    throw err
   }
 
   // Sin contenido (ej. DELETE) o respuesta JSON/texto segun el content-type

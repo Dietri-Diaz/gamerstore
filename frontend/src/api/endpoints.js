@@ -27,6 +27,11 @@ export const PublicAPI = {
   productos: (categoria, q) => api.get('/productos' + qs({ categoria, q })),
   producto: (id) => api.get('/productos/' + id),
   categorias: () => api.get('/categorias'),
+  reniec: (dni) => api.get('/reniec/' + dni),
+  verificarCliente: (data) => api.post('/checkout/cliente', data),
+  checkout: (data) => api.post('/checkout', data),
+  // Boleta publica de un pedido, verificada por DNI del comprador
+  boletaUrl: (pedidoCodigo, dni) => '/checkout/boleta/' + pedidoCodigo + qs({ dni }),
 }
 
 // --- Admin: CRUD completo del panel, requiere estar logueado (token JWT) ---
@@ -59,6 +64,12 @@ export const AdminAPI = {
   eliminarPedido: (id) => api.del('/admin/pedidos/' + id),
   reportePedidosUrl: (params) => '/admin/pedidos/reporte.pdf' + qs(params || {}),
 
+  // Comprobantes (boletas) emitidos: registro de ventas + resumen + descarga en PDF
+  comprobantes: (params) => api.get('/admin/comprobantes' + qs(params || {})),
+  resumenVentas: (params) => api.get('/admin/comprobantes/resumen' + qs(params || {})),
+  boletaUrl: (id) => '/admin/comprobantes/' + id + '/pdf',
+  boletaPedidoUrl: (pedidoId) => '/admin/comprobantes/pedido/' + pedidoId + '/pdf',
+
   // CRUD de usuarios del panel admin
   usuarios: () => api.get('/admin/usuarios'),
   crearUsuario: (data) => api.post('/admin/usuarios', data),
@@ -79,4 +90,19 @@ export const AdminAPI = {
     }
     return res.json()
   }),
+
+  // Verificacion de duplicados en vivo (mientras el usuario escribe en el formulario)
+  existeProducto: (nombre, id) => api.get('/admin/productos/existe' + qs({ nombre, id })),
+  existeCategoria: (nombre, id) => api.get('/admin/categorias/existe' + qs({ nombre, id })),
+  existeCliente: (params) => api.get('/admin/clientes/existe' + qs(params || {})),
+  existeUsuario: (params) => api.get('/admin/usuarios/existe' + qs(params || {})),
+}
+
+// Pasarela de pagos: cobro con Yape (QR + N° de operación) o con tarjeta.
+export const PagosAPI = {
+  listar: () => api.get('/admin/pagos'),
+  config: () => api.get('/admin/pagos/config'),
+  pagarTarjeta: (data) => api.post('/admin/pagos/tarjeta', data),
+  pagarYape: (data) => api.post('/admin/pagos/yape', data),
+  comprobanteUrl: (id) => '/admin/pagos/' + id + '/comprobante.pdf',
 }
