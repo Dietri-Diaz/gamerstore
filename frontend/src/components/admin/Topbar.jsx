@@ -2,12 +2,17 @@ import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext.jsx'
 
 // Título a mostrar en la barra superior según la ruta actual del panel admin.
+// OJO: al agregar una pantalla nueva al panel, súmala también aquí; si no, la
+// barra superior mostrará "Panel" en vez de su nombre.
 const TITLES = {
   '/admin': 'Dashboard',
   '/admin/productos': 'Productos',
   '/admin/categorias': 'Categorías',
   '/admin/clientes': 'Clientes',
   '/admin/pedidos': 'Pedidos',
+  '/admin/ventas': 'Ventas',
+  '/admin/pagos': 'Pagos',
+  '/admin/usuarios': 'Usuarios',
 }
 
 // Barra superior del panel admin: título de la sección actual y avatar/nombre
