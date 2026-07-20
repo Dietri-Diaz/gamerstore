@@ -109,7 +109,7 @@ spring.servlet.multipart.max-request-size=6MB
 # (p. ej. app.apidevperu.token=${APIDEVPERU_TOKEN}).
 app.apidevperu.enabled=true
 app.apidevperu.base-url=https://apiperu.dev/api
-app.apidevperu.token=860ec14d7924d36cd6cb33e98d4de1c187b0b16a75f30c73499504d485d446d7
+app.apidevperu.token=${APIDEVPERU_TOKEN}
 ```
 
 - [ ] **Step 3: Añadir el mismo bloque JWT + apiperu (deshabilitado) al perfil de test** en `src/test/resources/application-test.properties` (secreto para el contexto y `enabled=false` para no llamar a la red en los tests):
