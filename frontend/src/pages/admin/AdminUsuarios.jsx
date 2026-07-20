@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AdminAPI } from '../../api/endpoints.js'
 import { useTableControls } from '../../hooks/useTableControls.js'
+import { useAutoClear } from '../../hooks/useAutoClear.js'
+import { useDuplicado } from '../../hooks/useDuplicado.js'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { useConfirm } from '../../components/ui/Confirm.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -29,6 +31,22 @@ export default function AdminUsuarios() {
     pageSize: 8,
     initialSort: { key: 'username', dir: 'asc' },
   })
+
+  // El mensaje de error del formulario se borra solo a los 5s (no se queda estático).
+  useAutoClear(formError, setFormError)
+
+  // Aviso en vivo si el usuario ya existe.
+  const dupUser = useDuplicado(
+    form.username,
+    (v) => AdminAPI.existeUsuario({ username: v, id: editing?.id }),
+    { activo: showModal, minLargo: 3 }
+  )
+  // Aviso en vivo si el email ya está registrado por otro usuario.
+  const dupEmail = useDuplicado(
+    form.email,
+    (v) => AdminAPI.existeUsuario({ email: v, id: editing?.id }),
+    { activo: showModal, minLargo: 5 }
+  )
 
   const cargar = () => AdminAPI.usuarios().then(setUsuarios).catch(() => setUsuarios([]))
   // Carga el listado de usuarios al montar el componente
@@ -169,7 +187,7 @@ export default function AdminUsuarios() {
           footer={
             <>
               <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={guardar} disabled={saving}>
+              <button className="btn btn-primary" onClick={guardar} disabled={saving || dupUser.duplicado || dupEmail.duplicado}>
                 <i className="bi bi-check2" /> {saving ? 'Guardando...' : 'Guardar'}
               </button>
             </>
@@ -180,11 +198,17 @@ export default function AdminUsuarios() {
             <div className="form-grid">
               <div className="field">
                 <label className="label">Usuario *</label>
-                <input className="input" value={form.username} onChange={cambiar('username')} required />
+                <input className={'input' + (dupUser.duplicado ? ' input-error' : '')} value={form.username} onChange={cambiar('username')} required />
+                {dupUser.duplicado && (
+                  <small className="campo-error"><i className="bi bi-exclamation-triangle-fill" /> {dupUser.mensaje}</small>
+                )}
               </div>
               <div className="field">
                 <label className="label">Email *</label>
-                <input className="input" type="email" value={form.email} onChange={cambiar('email')} required />
+                <input className={'input' + (dupEmail.duplicado ? ' input-error' : '')} type="email" value={form.email} onChange={cambiar('email')} required />
+                {dupEmail.duplicado && (
+                  <small className="campo-error"><i className="bi bi-exclamation-triangle-fill" /> {dupEmail.mensaje}</small>
+                )}
               </div>
               <div className="field full">
                 <label className="label">Nombre *</label>

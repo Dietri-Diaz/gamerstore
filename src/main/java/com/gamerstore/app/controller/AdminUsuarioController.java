@@ -1,5 +1,6 @@
 package com.gamerstore.app.controller;
 
+import com.gamerstore.app.dto.ExisteDTO;
 import com.gamerstore.app.dto.UsuarioDTO;
 import com.gamerstore.app.dto.UsuarioRequest;
 import com.gamerstore.app.mapper.UsuarioMapper;
@@ -48,5 +49,19 @@ public class AdminUsuarioController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         usuarioService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Verifica en vivo (mientras el usuario escribe) si el username o el email ya están registrados por otro usuario. */
+    @GetMapping("/existe")
+    public ExisteDTO existe(@RequestParam(required = false) String username,
+                            @RequestParam(required = false) String email,
+                            @RequestParam(required = false) Long id) {
+        if (username != null && !username.isBlank() && usuarioService.existeUsername(username, id)) {
+            return new ExisteDTO(true, "Ese usuario ya existe");
+        }
+        if (email != null && !email.isBlank() && usuarioService.existeEmail(email, id)) {
+            return new ExisteDTO(true, "Ese email ya está registrado");
+        }
+        return new ExisteDTO(false, null);
     }
 }

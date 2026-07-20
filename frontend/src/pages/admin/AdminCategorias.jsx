@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AdminAPI } from '../../api/endpoints.js'
 import { useTableControls } from '../../hooks/useTableControls.js'
+import { useAutoClear } from '../../hooks/useAutoClear.js'
+import { useDuplicado } from '../../hooks/useDuplicado.js'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { useConfirm } from '../../components/ui/Confirm.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -26,6 +28,16 @@ export default function AdminCategorias() {
     pageSize: 8,
     initialSort: { key: 'id', dir: 'asc' },
   })
+
+  // El mensaje de error del formulario se borra solo a los 5s (no se queda estático).
+  useAutoClear(formError, setFormError)
+
+  // Aviso en vivo si ya existe una categoría con ese nombre (sin click ni Enter).
+  const dupNombre = useDuplicado(
+    nombre,
+    (v) => AdminAPI.existeCategoria(v, editing?.id),
+    { activo: showModal }
+  )
 
   const cargar = () => AdminAPI.categorias().then(setCategorias).catch(() => setCategorias([]))
 
@@ -178,7 +190,7 @@ export default function AdminCategorias() {
           footer={
             <>
               <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={guardar} disabled={saving}>
+              <button className="btn btn-primary" onClick={guardar} disabled={saving || dupNombre.duplicado}>
                 <i className="bi bi-check2" /> {saving ? 'Guardando...' : 'Guardar'}
               </button>
             </>
@@ -189,13 +201,16 @@ export default function AdminCategorias() {
             <div className="field">
               <label className="label">Nombre *</label>
               <input
-                className="input"
+                className={'input' + (dupNombre.duplicado ? ' input-error' : '')}
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 placeholder="Ej: Consolas, Periféricos..."
                 required
                 autoFocus
               />
+              {dupNombre.duplicado && (
+                <small className="campo-error"><i className="bi bi-exclamation-triangle-fill" /> {dupNombre.mensaje}</small>
+              )}
             </div>
             <button type="submit" hidden />
           </form>

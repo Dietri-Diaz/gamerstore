@@ -1,5 +1,6 @@
 package com.gamerstore.app.controller;
 
+import com.gamerstore.app.dto.ExisteDTO;
 import com.gamerstore.app.dto.ProductoDTO;
 import com.gamerstore.app.dto.ProductoRequest;
 import com.gamerstore.app.mapper.ProductoMapper;
@@ -63,5 +64,12 @@ public class AdminProductoController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         productoService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Verifica en vivo (mientras el usuario escribe) si ya existe un producto con ese nombre. */
+    @GetMapping("/existe")
+    public ExisteDTO existe(@RequestParam String nombre, @RequestParam(required = false) Long id) {
+        boolean existe = productoService.existeNombre(nombre, id);
+        return new ExisteDTO(existe, existe ? "Ya existe un producto con ese nombre" : null);
     }
 }

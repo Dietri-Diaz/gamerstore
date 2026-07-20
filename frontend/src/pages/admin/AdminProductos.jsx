@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { AdminAPI } from '../../api/endpoints.js'
 import { money, sku } from '../../utils/format.js'
 import { useTableControls } from '../../hooks/useTableControls.js'
+import { useAutoClear } from '../../hooks/useAutoClear.js'
+import { useDuplicado } from '../../hooks/useDuplicado.js'
 import { useToast } from '../../components/ui/Toast.jsx'
 import { useConfirm } from '../../components/ui/Confirm.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -32,6 +34,16 @@ export default function AdminProductos() {
     pageSize: 8,
     initialSort: { key: 'nombre', dir: 'asc' },
   })
+
+  // El mensaje de error del formulario se borra solo a los 5s (no se queda estático).
+  useAutoClear(formError, setFormError)
+
+  // Aviso en vivo si ya existe un producto con ese nombre (sin click ni Enter).
+  const dupNombre = useDuplicado(
+    form.nombre,
+    (v) => AdminAPI.existeProducto(v, editing?.id),
+    { activo: showModal }
+  )
 
   const cargar = () => AdminAPI.productos().then(setProductos).catch(() => setProductos([]))
 
@@ -235,7 +247,7 @@ export default function AdminProductos() {
           footer={
             <>
               <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={guardar} disabled={saving}>
+              <button className="btn btn-primary" onClick={guardar} disabled={saving || dupNombre.duplicado}>
                 <i className="bi bi-check2" /> {saving ? 'Guardando...' : 'Guardar'}
               </button>
             </>
@@ -245,7 +257,10 @@ export default function AdminProductos() {
           <form onSubmit={guardar}>
             <div className="field">
               <label className="label">Nombre *</label>
-              <input className="input" value={form.nombre} onChange={cambiar('nombre')} required />
+              <input className={'input' + (dupNombre.duplicado ? ' input-error' : '')} value={form.nombre} onChange={cambiar('nombre')} required />
+              {dupNombre.duplicado && (
+                <small className="campo-error"><i className="bi bi-exclamation-triangle-fill" /> {dupNombre.mensaje}</small>
+              )}
             </div>
             <div className="field">
               <label className="label">Descripción</label>

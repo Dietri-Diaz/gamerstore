@@ -2,6 +2,7 @@ package com.gamerstore.app.controller;
 
 import com.gamerstore.app.dto.CategoriaDTO;
 import com.gamerstore.app.dto.CategoriaRequest;
+import com.gamerstore.app.dto.ExisteDTO;
 import com.gamerstore.app.mapper.CategoriaMapper;
 import com.gamerstore.app.service.CategoriaService;
 import jakarta.validation.Valid;
@@ -47,5 +48,12 @@ public class AdminCategoriaController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         categoriaService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Verifica en vivo (mientras el usuario escribe) si ya existe una categoría con ese nombre. */
+    @GetMapping("/existe")
+    public ExisteDTO existe(@RequestParam String nombre, @RequestParam(required = false) Long id) {
+        boolean existe = categoriaService.existeNombre(nombre, id);
+        return new ExisteDTO(existe, existe ? "La categoría ya existe" : null);
     }
 }
